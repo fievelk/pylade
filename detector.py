@@ -12,7 +12,7 @@ from twitter_corpus_reader import TwitterCorpusReader
 
 import utils
 
-def run_language_detector(training_corpus, test_corpus, only_language=None, error_value=1000):
+def canvar_trenkle_language_identifier(training_corpus, test_corpus, only_language=None, error_value=1000):
     # Get profiles of training languages using training corpus labeled tweets
     training_profiles = _training_profiles(training_corpus.all_tweets())
 
@@ -121,15 +121,16 @@ def main():
     training_corpus = TwitterCorpusReader(training_file)
     test_corpus = TwitterCorpusReader(test_file)
 
-    error_values = [100, 200, 300, 400, 600, 1000, 1500, 2000, 3000, 4000]
+    error_values = [1000, 1500, 2000, 3000, 4000, 6000, 8000]
     languages =  training_corpus.available_languages()
+    # languages = ['it']
 
     utils.evaluate_implementation(
-        implementation=run_language_detector,
+        implementation=canvar_trenkle_language_identifier,
         error_values=error_values,
-        languages=languages,
+        languages=languages, # Each of these languages will be used to overwrite the "only_language" value
         output_file='results.txt',
-        training_corpus=training_corpus, test_corpus=test_corpus, only_language='it')
+        training_corpus=training_corpus, test_corpus=test_corpus, only_language=None)
 
 if __name__ == '__main__':
     main()

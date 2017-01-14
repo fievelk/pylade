@@ -90,7 +90,7 @@ class TwitterCorpusReader(object):
 
     def available_languages(self):
         # return AVAILABLE_LANGUAGES
-        return self.languages_tweets_stats().keys()
+        return list(self.languages_tweets_stats().keys())
 
     def languages_tweets_stats(self):
         languages_tweets_stats = defaultdict(int)

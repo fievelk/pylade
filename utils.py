@@ -41,8 +41,7 @@ def compute_text_profile(text, limit=None):
 
 def _language_ngram_frequencies(labeled_tweets):
     """
-    Return a profile of ngram frequencies for each language in the corpus.
-    freqs = {'language': {'bla' : 43, 'blaw': 12, 'b': 500}}
+    Compute ngram frequencies for each language in the corpus.
 
     >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
     >>> lang_ngram_freqs = _language_ngram_frequencies(tweets)
@@ -52,18 +51,16 @@ def _language_ngram_frequencies(labeled_tweets):
         'en': {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, 'lo': 1, \
             'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}}
     True
-    """
-    # print("Computing language profiles as ngram frequencies")
 
+    """
     # freqs = defaultdict(lambda : defaultdict(int))
     freqs = defaultdict(_nested_defaultdict)
-
     for tweet in labeled_tweets:
-        lang = tweet['language']
-        # freqs[lang] = aggiornarle con quelle del tweet
-        tweet_ngram_freqs = _extract_text_ngram_freqs(tweet['text'])
+          lang = tweet['language']
+          tweet_ngram_freqs = _extract_text_ngram_freqs(tweet['text'])
+          _merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
 
-    return _merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
+    return freqs
 
 def _extract_text_ngram_freqs(text):
     """
@@ -136,28 +133,37 @@ def _merge_dictionaries_summing(first_dict, second_dict):
 # Results and evaluation
 
 def evaluate_implementation(implementation, error_values, languages, output_file=None, *args, **kwargs):
+    """
+    Evaluate language identification implementation.
+
+    """
+    print("Evaluating implementation of {}.".format(implementation.__name__))
+    print("Error values: ", error_values)
+    print("Languages: ", languages)
+    print()
+
     results = defaultdict(lambda: defaultdict(float))
     for lang in languages:
         for err_val in error_values:
-            # acc = implementation(training_file, test_file, only_language='it', error_value=err_val)
+            print("Evaluating results for [LANG: {}, ERR_VAL: {}]".format(lang, err_val))
+            # Only evaluate tweets with this language
+            kwargs['only_language'] = lang
             acc = implementation(*args, **kwargs, error_value=err_val)
-            # print('ERR_VAL: {}, accuracy: {}'.format(err_val, acc))
-            result = {lang: {str(err_val): acc}}
+            single_result = {lang: {str(err_val): acc}}
             results[lang][str(err_val)] = acc
             if output_file:
-                save_result(output_file, result)
+                _save_result(output_file, single_result)
     return results
 
-
-def save_result(output_file, results):
+def _save_result(output_file, result):
     res_list = []
     if not os.path.isfile(output_file):
-        res_list.append(results)
+        res_list.append(result)
         with open(output_file, mode='w') as f:
-            f.write(json.dumps(results, indent=2))
+            f.write(json.dumps(result, indent=2))
     else:
         with open(output_file, 'r') as feeds_json:
-            previous_results = json.load(feeds_json)
+            previous_result = json.load(feeds_json)
 
         for k,v in results.items():
             if k in previous_results:
@@ -167,23 +173,3 @@ def save_result(output_file, results):
 
         with open(output_file, mode='w') as f:
             f.write(json.dumps(previous_results, indent=2))
-
-# def _merge_dict2(dict1, dict2):
-#     for k,v in dict2.items():
-#         if k in dict1:
-#             _merge_dict2(dict1[k], v)
-#         else:
-#             dict1[k] = v
-
-
-# def save_results(output_file, results):
-#     with open(output_file, 'a') as output:
-#         json.dump(results, output)
-        # for lang in results:
-        #     for err_value in sorted(results[lang], key=lambda x: results[lang][x]):
-        #         output.write("[{}] [{}] [{}]\n".format(lang, err_value, results[lang][err_value]))
-        #     output.write('\n')
-
-        # for res in sorted(results.items(), key=lambda x: x[1], reverse=True):
-        #     output.write("[{}]".format())
-        #     print("Err value: {} ---> {}".format(res[0], res[1]))
