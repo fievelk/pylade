@@ -12,10 +12,7 @@ from twitter_corpus_reader import TwitterCorpusReader
 
 import utils
 
-def run_language_detector(training_set_file, test_set_file, only_language=None, error_value=1000):
-    training_corpus = TwitterCorpusReader(training_set_file)
-    test_corpus = TwitterCorpusReader(test_set_file)
-
+def run_language_detector(training_corpus, test_corpus, only_language=None, error_value=1000):
     # Get profiles of training languages using training corpus labeled tweets
     training_profiles = _training_profiles(training_corpus.all_tweets())
 
@@ -121,16 +118,18 @@ def main():
     training_file = main_directory + 'ppp_training_set.csv'
     test_file = main_directory + 'ppp_test_set.csv'
 
-    # run_language_detector(training_file, test_file)
+    training_corpus = TwitterCorpusReader(training_file)
+    test_corpus = TwitterCorpusReader(test_file)
+
     error_values = [100, 200, 300, 400, 600, 1000, 1500, 2000, 3000, 4000]
-    languages = ['it', 'es']
+    languages =  training_corpus.available_languages()
 
     utils.evaluate_implementation(
         implementation=run_language_detector,
         error_values=error_values,
         languages=languages,
         output_file='results.txt',
-        training_set_file=training_file, test_set_file=test_file, only_language='it')
+        training_corpus=training_corpus, test_corpus=test_corpus, only_language='it')
 
 if __name__ == '__main__':
     main()
