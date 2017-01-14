@@ -2,6 +2,9 @@
 #! -*- coding: utf-8 -*-
 
 from collections import defaultdict
+from copy import deepcopy
+import json
+import os
 
 from nltk.util import ngrams
 from nltk.tokenize import wordpunct_tokenize
@@ -59,9 +62,8 @@ def _language_ngram_frequencies(labeled_tweets):
         lang = tweet['language']
         # freqs[lang] = aggiornarle con quelle del tweet
         tweet_ngram_freqs = _extract_text_ngram_freqs(tweet['text'])
-        _merge_dictionaries(freqs[lang], tweet_ngram_freqs)
 
-    return freqs
+    return _merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
 
 def _extract_text_ngram_freqs(text):
     """
@@ -105,12 +107,83 @@ def _nested_defaultdict():
     return defaultdict(int)
 
 
-def _merge_dictionaries(first_dict, second_dict):
+def _merge_dictionaries_summing(first_dict, second_dict):
     """
-    Merge two dictionaries returning an enriched version of the first one.
+    Merge two dictionaries summing values with the same key. Returns the enriched
+    version of the first dictionary (so it works in place).
     Note: this works only with defaultdict.
 
     """
     for k, v in second_dict.items():
         first_dict[k] += v
     return first_dict
+    # new_dict = deepcopy(first_dict)
+    # for k, v in second_dict.items():
+    #     new_dict[k] += v
+    # return new_dict
+
+# def _merge_dicts(*dictionaries):
+#     """
+#     Given any number of dicts, shallow copy and merge into a new dict,
+#     precedence goes to key value pairs in latter dicts.
+#     """
+#     result = {}
+#     for dictionary in dictionaries:
+#         result.update(dictionary)
+#     return result
+
+
+# Results and evaluation
+
+def evaluate_implementation(implementation, error_values, languages, output_file=None, *args, **kwargs):
+    results = defaultdict(lambda: defaultdict(float))
+    for lang in languages:
+        for err_val in error_values:
+            # acc = implementation(training_file, test_file, only_language='it', error_value=err_val)
+            acc = implementation(*args, **kwargs, error_value=err_val)
+            # print('ERR_VAL: {}, accuracy: {}'.format(err_val, acc))
+            result = {lang: {str(err_val): acc}}
+            results[lang][str(err_val)] = acc
+            if output_file:
+                save_result(output_file, result)
+    return results
+
+
+def save_result(output_file, results):
+    res_list = []
+    if not os.path.isfile(output_file):
+        res_list.append(results)
+        with open(output_file, mode='w') as f:
+            f.write(json.dumps(results, indent=2))
+    else:
+        with open(output_file, 'r') as feeds_json:
+            previous_results = json.load(feeds_json)
+
+        for k,v in results.items():
+            if k in previous_results:
+                previous_results[k].update(v)
+            else:
+                previous_results[k] = v
+
+        with open(output_file, mode='w') as f:
+            f.write(json.dumps(previous_results, indent=2))
+
+# def _merge_dict2(dict1, dict2):
+#     for k,v in dict2.items():
+#         if k in dict1:
+#             _merge_dict2(dict1[k], v)
+#         else:
+#             dict1[k] = v
+
+
+# def save_results(output_file, results):
+#     with open(output_file, 'a') as output:
+#         json.dump(results, output)
+        # for lang in results:
+        #     for err_value in sorted(results[lang], key=lambda x: results[lang][x]):
+        #         output.write("[{}] [{}] [{}]\n".format(lang, err_value, results[lang][err_value]))
+        #     output.write('\n')
+
+        # for res in sorted(results.items(), key=lambda x: x[1], reverse=True):
+        #     output.write("[{}]".format())
+        #     print("Err value: {} ---> {}".format(res[0], res[1]))
