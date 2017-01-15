@@ -121,7 +121,7 @@ def main():
     training_corpus = TwitterCorpusReader(training_file)
     test_corpus = TwitterCorpusReader(test_file)
 
-    error_values = [1000, 1500, 2000, 3000, 4000, 6000, 8000]
+    error_values = [2000, 3000, 4000, 6000, 8000]
     languages =  training_corpus.available_languages()
     # languages = ['it']
 
@@ -131,6 +131,7 @@ def main():
         languages=languages, # Each of these languages will be used to overwrite the "only_language" value
         output_file='results.txt',
         training_corpus=training_corpus, test_corpus=test_corpus, only_language=None)
+
 
 if __name__ == '__main__':
     main()

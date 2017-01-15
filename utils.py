@@ -163,9 +163,9 @@ def _save_result(output_file, result):
             f.write(json.dumps(result, indent=2))
     else:
         with open(output_file, 'r') as feeds_json:
-            previous_result = json.load(feeds_json)
+            previous_results = json.load(feeds_json)
 
-        for k,v in results.items():
+        for k,v in result.items():
             if k in previous_results:
                 previous_results[k].update(v)
             else:

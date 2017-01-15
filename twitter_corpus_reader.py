@@ -89,6 +89,11 @@ class TwitterCorpusReader(object):
                 return
 
     def available_languages(self):
+        """
+        Return a list of the available languages in the corpus.
+        'und' is for 'undefined'.
+
+        """
         # return AVAILABLE_LANGUAGES
         return list(self.languages_tweets_stats().keys())
 
