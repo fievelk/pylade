@@ -6,64 +6,81 @@ from bokeh.palettes import linear_palette, Viridis256, all_palettes
 from bokeh.models import HoverTool, BoxSelectTool, ColumnDataSource
 
 
-def _build_figure(dictionary, axes_labels=None, plot_width=400, plot_height=400):
+def _build_figure(dictionary, axis_labels=None, plot_width=400, plot_height=400):
+    """
+    `dictionary` has this structure:
+        {
+        'lang1':
+            {
+                'err_value1_1', 'accuracy1_1',
+                'err_value1_2', 'accuracy1_2'
+            },
+        'lang2':
+            {
+                'err_value2_1', 'accuracy2_1',
+                'err_value2_2', 'accuracy2_2'
+            }
+        }
+
+    """
+
+    if not axis_labels:
+        axis_labels = {'x': 'x axis', 'y': 'y axis'}
+
     color_palette = _get_spaced_colors(len(dictionary))
     color_index = 0
 
-    plot_figure = figure(plot_width=plot_width, plot_height=plot_height)
-
-    if not axes_labels:
-        axes_labels = {'x': 'x axis', 'y': 'y axis'}
+    plot_figure = figure(
+        plot_width=plot_width,
+        plot_height=plot_height,
+        x_axis_label = axis_labels['x'],
+        y_axis_label = axis_labels['y']
+   )
 
     for lang in dictionary:
-        x = []
-        y = []
+        x_points = []
+        y_points = []
         for k, v in sorted(dictionary[lang].items()):
-            x.append(k)
-            y.append(v)
+            x_points.append(k)
+            y_points.append(v)
 
         color = color_palette[color_index]
         color_string = "rgb{}".format(color)
-        # line = plot_figure.line(x, y, legend=lang, line_color=color, line_width=2, name=lang)
+
+        number_of_points = len(x_points)
         line_source = ColumnDataSource({
-            axes_labels['x']: x,
-            axes_labels['y']: y,
-            'language': [lang]*len(x),
-            'color': [color_string]*len(x)
+            axis_labels['x']: x_points,
+            axis_labels['y']: y_points,
+            'language': [lang] * number_of_points,
+            'color': [color_string] * number_of_points
         })
 
         plot_figure.line(
-            axes_labels['x'],
-            axes_labels['y'],
+            axis_labels['x'],
+            axis_labels['y'],
             source=line_source,
             line_color=color,
             line_width=2,
             legend=lang
         )
 
-        # _add_line_hover_tooltips(line, plot_figure, tooltips)
-
         color_index += 1
 
     tooltips = [
         ("Language", "@language"),
-        (axes_labels['x'], "$x"),
-        (axes_labels['y'], "$y"),
+        (axis_labels['x'], "$x"),
+        (axis_labels['y'], "$y"),
         ("Color", "<span class='bk-tooltip-color-block' "
                   "style='background-color:@color'> </span>"),
     ]
 
-    # plot_figure.toolbar_location = None
     plot_figure.add_tools(HoverTool(tooltips=tooltips))
     return plot_figure
-#
-# def _add_line_hover_tooltips(line, plot_figure, tooltips):
-#     plot_figure.add_tools(HoverTool(renderers=[line], tooltips=tooltips))
 
 def plot_results(output_filename, results_dict):
     output_file(output_filename)
-    axes_labels = {'x': 'err_val', 'y': 'acc'}
-    plot_figure = _build_figure(results_dict, axes_labels, 800, 800)
+    axis_labels = {'x': 'err_val', 'y': 'acc'}
+    plot_figure = _build_figure(results_dict, axis_labels, 800, 800)
     show(plot_figure)
 
 def parse_result_files(input_file):
