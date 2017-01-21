@@ -39,6 +39,7 @@ class TwitterCorpusReader(object):
     """Corpus Reader for custom twitter corpus."""
 
     def __init__(self, corpus_path=None):
+        # TODO: Check if corpus path leads to an existing file (create property)
         self.corpus_path = corpus_path
 
     def all_tweets(self, limit=0):
