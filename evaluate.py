@@ -61,7 +61,7 @@ def _parse_arguments():
 
 def start_evaluation(arguments):
     model_file = arguments['model_file'] #json
-    model_file_format = arguments['model_file_format'] #TODO: test on pickle
+    model_file_format = arguments['model_file_format']
     model = utils.load_file(model_file, file_format=model_file_format)
 
     test_data_file = arguments['test_data_file'] #csv file
