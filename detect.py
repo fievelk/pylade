@@ -21,22 +21,18 @@ def _parse_arguments():
         action="store_const", dest="loglevel", const=logging.INFO,
     )
     parser.add_argument(
-        '-m', '--model',
+        'model',
         help="Path to model input file (e.g. model.json)",
-        action="store", dest="model_file",
-        default='model.json'
+    )
+    parser.add_argument(
+        'text',
+        help="Text to be translated",
     )
     parser.add_argument(
         '-i', '--implementation',
         help="Chosen method (e.g. CanvarTrenkle)",
         action="store", dest="implementation",
         default='CavnarTrenkleImpl'
-    )
-    parser.add_argument(
-        '-t', '--text',
-        help="Text to be translated",
-        action="store", dest="text",
-        default=None
     )
     parser.add_argument(
         '-o', '--output',
@@ -48,13 +44,10 @@ def _parse_arguments():
     return vars(parser.parse_args())
 
 def start_detection(arguments):
-    model_file = arguments['model_file'] #json
+    model_file = arguments['model']
     model = utils.load_file(model_file)
-
     text = arguments['text']
-
     output_file = arguments['output_file']
-
     implementation = utils.find_implementation(arguments['implementation'])
     # implementation = implementation(model=model, error_value=error_value) # TODO: implement this kind of constructor
 
