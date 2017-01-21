@@ -21,10 +21,8 @@ def _parse_arguments():
         action="store_const", dest="loglevel", const=logging.INFO,
     )
     parser.add_argument(
-        '-m', '--model',
+        'model',
         help="Path to model input file (e.g. model.json)",
-        action="store", dest="model_file",
-        default='model.json'
     )
     parser.add_argument(
         '-i', '--implementation',
@@ -56,7 +54,7 @@ def _parse_arguments():
     return vars(parser.parse_args())
 
 def start_evaluation(arguments):
-    model_file = arguments['model_file'] #json
+    model_file = arguments['model']
     model = utils.load_file(model_file)
 
     test_data_file = arguments['test_data_file']
@@ -70,6 +68,8 @@ def start_evaluation(arguments):
     output_file = arguments['results_output_file']
 
     implementation = utils.find_implementation(arguments['implementation'])
+    logging.info("Evaluating implementation of {}.".format(implementation.__name__))
+
     # TODO: At the moment, results are just accuracy (float). We should foresee a dictionary of key-values (precision, recall, accuracy, ...)
     # TODO: `only_language` and `error_value` should be kwargs explicitly passed by command-line.
     # This is because they can differ from implementation to implementation
