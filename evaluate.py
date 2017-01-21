@@ -74,7 +74,7 @@ def start_evaluation(arguments):
     # TODO: `only_language` and `error_value` should be kwargs explicitly passed by command-line.
     # This is because they can differ from implementation to implementation
     results = implementation().evaluate(model, test_instances, only_language=None, error_value=8000)
-    utils.save_file(model, output_file)
+    utils.save_file(results, output_file)
 
 
 # TODO: This was used to test several implementations using several parameters.
