@@ -4,27 +4,36 @@
 from collections import defaultdict
 from copy import deepcopy
 import json
+import logging
 import os
+import pickle
 
-from nltk.util import ngrams
-from nltk.tokenize import wordpunct_tokenize
+# from nltk.util import ngrams
+from nltk.tokenize import wordpunct_tokenize # TODO: delete
 
-def language_profiles(labeled_tweets, limit=None):
-    """
-    A profile is a list of ngrams sorted in reverse order (from the most
-    frequent to the less frequent). Each language has its own list (profile).
-    This method returns a dictionary in which each key is a language whose
-    value is a list of ngrams (the language profile).
+from twitter_corpus_reader import TwitterCorpusReader
+from cavnar_trenkle_impl import CavnarTrenkleImpl
 
-    """
-    language_profiles = dict()
-    lang_ngram_freqs = _language_ngram_frequencies(labeled_tweets)
-    print("Sorting language profiles in lists")
-    for language in lang_ngram_freqs:
-        #TODO: This part is almost duplicated in compute_text_profile(). Should use the latter.
-        # Sort by value first, and then also by key (alphabetic order) if values are equal
-        language_profiles[language] = [ngram[0] for ngram in sorted(lang_ngram_freqs[language].items(), key= lambda x: (x[1], x[0]), reverse=True)[:limit]]
-    return language_profiles
+CORPUS_READERS = {TwitterCorpusReader}
+IMPLEMENTATIONS = {CavnarTrenkleImpl}
+
+# TODO: delete
+# def language_profiles(labeled_tweets, limit=None):
+#     """
+#     A profile is a list of ngrams sorted in reverse order (from the most
+#     frequent to the less frequent). Each language has its own list (profile).
+#     This method returns a dictionary in which each key is a language whose
+#     value is a list of ngrams (the language profile).
+#
+#     """
+#     language_profiles = dict()
+#     lang_ngram_freqs = _language_ngram_frequencies(labeled_tweets)
+#     print("Sorting language profiles in lists")
+#     for language in lang_ngram_freqs:
+#         #TODO: This part is almost duplicated in compute_text_profile(). Should use the latter.
+#         # Sort by value first, and then also by key (alphabetic order) if values are equal
+#         language_profiles[language] = [ngram[0] for ngram in sorted(lang_ngram_freqs[language].items(), key= lambda x: (x[1], x[0]), reverse=True)[:limit]]
+#     return language_profiles
 
 def compute_text_profile(text, limit=None):
     """
@@ -39,57 +48,59 @@ def compute_text_profile(text, limit=None):
     # Sort by value first, and then also by key (inverse alphabetic order) if values are equal
     return [ngram[0] for ngram in sorted(text_ngram_freqs.items(), key=lambda x: (x[1], x[0]), reverse=True)[:limit]]
 
-def _language_ngram_frequencies(labeled_tweets):
-    """
-    Compute ngram frequencies for each language in the corpus.
+# TODO: delete
+# def _language_ngram_frequencies(labeled_tweets):
+#     """
+#     Compute ngram frequencies for each language in the corpus.
+#
+#     >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
+#     >>> lang_ngram_freqs = _language_ngram_frequencies(tweets)
+#     >>> lang_ngram_freqs == {\
+#         'it': {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, \
+#             'ia': 1, 'ao': 1, 'cia': 1, 'iao': 1, 'ciao': 1}, \
+#         'en': {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, 'lo': 1, \
+#             'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}}
+#     True
+#
+#     """
+#     # freqs = defaultdict(lambda : defaultdict(int))
+#     freqs = defaultdict(_nested_defaultdict)
+#     for tweet in labeled_tweets:
+#           lang = tweet['language']
+#           tweet_ngram_freqs = _extract_text_ngram_freqs(tweet['text'])
+#           _merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
+#
+#     return freqs
 
-    >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
-    >>> lang_ngram_freqs = _language_ngram_frequencies(tweets)
-    >>> lang_ngram_freqs == {\
-        'it': {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, \
-            'ia': 1, 'ao': 1, 'cia': 1, 'iao': 1, 'ciao': 1}, \
-        'en': {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, 'lo': 1, \
-            'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}}
-    True
-
-    """
-    # freqs = defaultdict(lambda : defaultdict(int))
-    freqs = defaultdict(_nested_defaultdict)
-    for tweet in labeled_tweets:
-          lang = tweet['language']
-          tweet_ngram_freqs = _extract_text_ngram_freqs(tweet['text'])
-          _merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
-
-    return freqs
-
-def _extract_text_ngram_freqs(text):
-    """
-    Tokenize the text. For each token in the text, extract ngrams of different
-    length (from 1 to 5). Compute how many times each of these ngrams occur
-    in the text. Then return a dictionary of { ngram: frequencies }.
-
-    >>> ngrams = _extract_text_ngram_freqs("HeLLo")
-    >>> ngrams == {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, \
-        'lo': 1, 'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}
-    True
-    >>> ngrams = _extract_text_ngram_freqs("CIAO")
-    >>> ngrams == {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, 'ia': 1, 'ao': 1, \
-        'cia': 1, 'iao': 1, 'ciao': 1}
-    True
-    """
-    tokens = wordpunct_tokenize(text.lower()) # Force lower case
-    #TODO: Eliminare numeri e punteggiatura
-    #TODO: Usare il twitter tokenizer?
-
-    ngram_freqs = defaultdict(int)
-    for token in tokens:
-        for n in range(1,6): # Use 1-grams to 5-grams
-            for ngram in ngrams(token, n):
-                ngram_string = ''.join(ngram)
-                ngram_freqs[ngram_string] += 1
-            # ngram_freqs[ngrams(token, n)] += 1
-
-    return ngram_freqs
+# TODO: delete
+# def _extract_text_ngram_freqs(text):
+#     """
+#     Tokenize the text. For each token in the text, extract ngrams of different
+#     length (from 1 to 5). Compute how many times each of these ngrams occur
+#     in the text. Then return a dictionary of { ngram: frequencies }.
+#
+#     >>> ngrams = _extract_text_ngram_freqs("HeLLo")
+#     >>> ngrams == {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, \
+#         'lo': 1, 'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}
+#     True
+#     >>> ngrams = _extract_text_ngram_freqs("CIAO")
+#     >>> ngrams == {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, 'ia': 1, 'ao': 1, \
+#         'cia': 1, 'iao': 1, 'ciao': 1}
+#     True
+#     """
+#     tokens = wordpunct_tokenize(text.lower()) # Force lower case
+#     #TODO: Eliminare numeri e punteggiatura
+#     #TODO: Usare il twitter tokenizer?
+#
+#     ngram_freqs = defaultdict(int)
+#     for token in tokens:
+#         for n in range(1,6): # Use 1-grams to 5-grams
+#             for ngram in ngrams(token, n):
+#                 ngram_string = ''.join(ngram)
+#                 ngram_freqs[ngram_string] += 1
+#             # ngram_freqs[ngrams(token, n)] += 1
+#
+#     return ngram_freqs
 
 def _nested_defaultdict():
     """
@@ -173,3 +184,38 @@ def _save_result(output_file, result):
 
         with open(output_file, mode='w') as f:
             f.write(json.dumps(previous_results, indent=2))
+
+def _load_profiles(file_path):
+    file_name = os.path.basename(file_path)
+    try:
+        profiles = pickle.load(open(file_path, "rb"))
+        print("Pickle profiles loaded for {}...".format(file_name))
+        return profiles
+    except (OSError, IOError) as e:
+        print("Some problems occurred while loading {}".format(file_name))
+        raise e
+
+def _save_as_pickle(content, output_file_path):
+    logging.info("Writing pickle file: {}".format(output_file_path))
+    pickle.dump(content, open(output_file_path, "wb"))
+
+def _save_as_json(content, output_file_path, indent=2):
+    logging.info("Writing json file: {}".format(output_file_path))
+    with open(output_file_path, mode='w') as f:
+        f.write(json.dumps(content, indent=2))
+
+def save_file(content, output_file_path, format='json'):
+    """
+    Save content to output file.
+
+    """
+    if format == 'json':
+        _save_as_json(content, output_file_path)
+    elif format == 'pickle':
+        _save_as_pickle(content, output_file_path)
+
+
+def _configure_logger(loglevel):
+    """Configure logging levels."""
+    logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.DEBUG)
+    logging.basicConfig(level=loglevel)

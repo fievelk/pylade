@@ -66,16 +66,20 @@ def _parse_arguments():
     )
     parser.add_argument(
         '-o', '--output',
-        help="Model output pickle file",
+        help="Output model name (json format)",
         action="store", dest="model_output_file",
-        default='model.pickle'
+        default='model.json'
+    )
+    parser.add_argument(
+        '--output-format',
+        help="Output model format",
+        action="store", dest="model_output_format",
+        default='json'
     )
 
     return vars(parser.parse_args())
 
 def start_training(arguments):
-    import os # TODO: remove
-
     training_data_file = arguments['training_data_file']
     corpus_reader_class = _find_corpus_reader(arguments['corpus_reader_class'])
     training_corpus = corpus_reader_class(training_data_file)
@@ -86,10 +90,11 @@ def start_training(arguments):
 
     logging.info("Training model...")
     output_file = arguments['model_output_file']
+    output_format = arguments['model_output_format']
 
     implementation = _find_implementation(arguments['implementation'])
     model = implementation().train(labeled_tweets, limit=5000)
-    utils.save_as_pickle(model, output_file)
+    utils.save_file(model, output_file, format=output_format)
 
 
 if __name__ == '__main__':
