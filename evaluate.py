@@ -40,7 +40,9 @@ def _parse_arguments():
     )
     parser.add_argument(
         '-t', '--test-data',
-        help="Path for test data file (e.g. test_tweets.csv)",
+        help="Path for test data file (e.g. test_tweets.csv). This file needs to\
+              be compatible with the Corpus Reader (specified with the \
+              --corpus-reader option)",
         action="store", dest="test_data_file",
         default='test_data.csv'
     )
@@ -64,7 +66,7 @@ def start_evaluation(arguments):
     model_file_format = arguments['model_file_format']
     model = utils.load_file(model_file, file_format=model_file_format)
 
-    test_data_file = arguments['test_data_file'] #csv file
+    test_data_file = arguments['test_data_file']
     corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
     test_corpus = corpus_reader_class(test_data_file)
 
@@ -79,7 +81,7 @@ def start_evaluation(arguments):
     # TODO: `only_language` and `error_value` should be kwargs explicitly passed by command-line.
     # This is because they can differ from implementation to implementation
     results = implementation().evaluate(model, test_instances, only_language=None, error_value=8000)
-    utils.save_file(model, output_file, format=output_format)
+    utils.save_file(model, output_file)
 
 
 # TODO: This was used to test several implementations using several parameters.

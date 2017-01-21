@@ -57,12 +57,6 @@ def _parse_arguments():
         action="store", dest="model_output_file",
         default='model.json'
     )
-    parser.add_argument(
-        '--output-format',
-        help="Output model format",
-        action="store", dest="model_output_format",
-        default='json'
-    )
 
     return vars(parser.parse_args())
 
@@ -77,12 +71,11 @@ def start_training(arguments):
 
     logging.info("Training model...")
     output_file = arguments['model_output_file']
-    output_format = arguments['model_output_format']
 
     implementation = utils.find_implementation(arguments['implementation'])
     # TODO: `limit` should be passed as argument by CLI
     model = implementation().train(labeled_tweets, limit=5000)
-    utils.save_file(model, output_file, format=output_format)
+    utils.save_file(model, output_file)
 
 
 if __name__ == '__main__':
