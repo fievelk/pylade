@@ -1,5 +1,5 @@
-# Graph output
-graph.html
+# Output files
+output/
 # Pickle files
 *.pickle
 # Byte-compiled / optimized / DLL files
