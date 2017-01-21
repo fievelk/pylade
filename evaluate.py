@@ -8,7 +8,8 @@ import utils
 
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
-    parser = argparse.ArgumentParser()
+    description = "Evaluate a language detection model using a test corpus."
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         '-d', '--debug',
         help="Activates debug mode",
@@ -31,11 +32,10 @@ def _parse_arguments():
         default='CavnarTrenkleImpl'
     )
     parser.add_argument(
-        '-t', '--test-data',
+        'test-data',
         help="Path for test data file (e.g. test_tweets.csv). This file needs to\
               be compatible with the Corpus Reader (specified with the \
               --corpus-reader option)",
-        action="store", dest="test_data_file",
         default='test_data.csv'
     )
     parser.add_argument(
@@ -57,7 +57,7 @@ def start_evaluation(arguments):
     model_file = arguments['model']
     model = utils.load_file(model_file)
 
-    test_data_file = arguments['test_data_file']
+    test_data_file = arguments['test-data']
     corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
     test_corpus = corpus_reader_class(test_data_file)
 
