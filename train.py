@@ -21,7 +21,9 @@ import utils
 
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
-    parser = argparse.ArgumentParser()
+
+    description = "Train a language detection model using a training corpus."
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         '-d', '--debug',
         help="Activates debug mode",
@@ -40,10 +42,8 @@ def _parse_arguments():
         default='CavnarTrenkleImpl'
     )
     parser.add_argument(
-        '-t', '--training-data',
+        'training-data',
         help="Path for training data file (e.g. training_tweets.csv)",
-        action="store", dest="training_data_file",
-        default='training_data.csv'
     )
     parser.add_argument(
         '-c', '--corpus-reader',
@@ -53,7 +53,7 @@ def _parse_arguments():
     )
     parser.add_argument(
         '-o', '--output',
-        help="Output model name (json format)",
+        help="Output model",
         action="store", dest="model_output_file",
         default='model.json'
     )
@@ -61,7 +61,7 @@ def _parse_arguments():
     return vars(parser.parse_args())
 
 def start_training(arguments):
-    training_data_file = arguments['training_data_file']
+    training_data_file = arguments['training-data']
     corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
     training_corpus = corpus_reader_class(training_data_file)
 
@@ -69,10 +69,10 @@ def start_training(arguments):
     logging.info("Retrieving all documents from training corpus...")
     labeled_tweets = training_corpus.all_tweets() # TODO: rename this method into 'all_instances', 'all_rows' or similarly generic
 
-    logging.info("Training model...")
     output_file = arguments['model_output_file']
 
     implementation = utils.find_implementation(arguments['implementation'])
+    logging.info("Training the model. This could take some time...")
     # TODO: `limit` should be passed as argument by CLI
     model = implementation().train(labeled_tweets, limit=5000)
     utils.save_file(model, output_file)
