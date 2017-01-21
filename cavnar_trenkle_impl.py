@@ -24,20 +24,34 @@ class CavnarTrenkleImpl(object):
 
         """
         language_profiles = dict()
-        lang_ngram_freqs = self._language_ngram_frequencies(labeled_instances)
+        languages_ngram_freqs = self._languages_ngram_frequencies(labeled_instances)
         print("Sorting language profiles in lists")
-        for language in lang_ngram_freqs:
-            #TODO: This part is almost duplicated in compute_text_profile(). Should use the latter.
-            # Sort by value first, and then also by key (alphabetic order) if values are equal
-            language_profiles[language] = [ngram[0] for ngram in sorted(lang_ngram_freqs[language].items(), key= lambda x: (x[1], x[0]), reverse=True)[:limit]]
+        for language in languages_ngram_freqs:
+            language_profiles[language] = self._compute_profile_from_frequencies(languages_ngram_freqs[language], limit)
         return language_profiles
 
-    def _language_ngram_frequencies(self, labeled_tweets):
+    def _compute_profile_from_frequencies(self, frequencies_dict, limit):
+        # Sort by value first, and then also by key (alphabetic order) if values are equal
+        return [ngram[0] for ngram in sorted(frequencies_dict.items(), key= lambda x: (x[1], x[0]), reverse=True)[:limit]]
+
+    def _compute_text_profile(self, text, limit=None):
+        """
+        >>> text = 'Hello'
+        >>> compute_text_profile(text)
+        ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
+        >>> compute_text_profile(text, limit=2)
+        ['l', 'o']
+
+        """
+        text_ngram_freqs = self._extract_text_ngram_freqs(text)
+        return self._compute_profile_from_frequencies(text_ngram_freqs, limit)
+
+    def _languages_ngram_frequencies(self, labeled_tweets):
         """
         Compute ngram frequencies for each language in the corpus.
 
         >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
-        >>> lang_ngram_freqs = _language_ngram_frequencies(tweets)
+        >>> lang_ngram_freqs = _languages_ngram_frequencies(tweets)
         >>> lang_ngram_freqs == {\
             'it': {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, \
                 'ia': 1, 'ao': 1, 'cia': 1, 'iao': 1, 'ciao': 1}, \
@@ -136,19 +150,6 @@ class CavnarTrenkleImpl(object):
                 predicted_language = language
 
         return predicted_language
-
-    def _compute_text_profile(self, text, limit=None):
-        """
-        >>> text = 'Hello'
-        >>> compute_text_profile(text)
-        ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
-        >>> compute_text_profile(text, limit=2)
-        ['l', 'o']
-
-        """
-        text_ngram_freqs = self._extract_text_ngram_freqs(text)
-        # Sort by value first, and then also by key (inverse alphabetic order) if values are equal
-        return [ngram[0] for ngram in sorted(text_ngram_freqs.items(), key=lambda x: (x[1], x[0]), reverse=True)[:limit]]
 
     def _distance(self, text_profile, training_profile, error_value=1000):
         """
