@@ -17,15 +17,6 @@ from cavnar_trenkle_impl import CavnarTrenkleImpl
 CORPUS_READERS = {TwitterCorpusReader}
 IMPLEMENTATIONS = {CavnarTrenkleImpl}
 
-# Temporarily use lambdas to postpone function definition
-# TODO: Move this constant somewhere else.
-SUPPORTED_FORMATS_FUNCTIONS = {
-    'save': {
-        '.json'  : lambda : _save_as_json,
-        '.pickle': lambda : _save_as_pickle
-    }
-}
-
 def _find_class_in_set(class_name, class_set):
     try:
         return next(class_item for class_item in class_set if class_item.__name__ == class_name )
@@ -128,16 +119,17 @@ def save_file(content, output_file_path):
     """
     # Detect format from file name
     _, ext = os.path.splitext(output_file_path)
-    save = _saving_function(ext)
+    save = _find_IO_function('save', ext)
     save(content, output_file_path)
 
-def _saving_function(extension):
+def _find_IO_function(operation, extension):
     """
     If the extension is supported, return the related saving function for that specific
     file type. Otherwise, return reference to a generic saving function.
+    Supported `operation` values: 'save', 'load'.
 
     """
-    return SUPPORTED_FORMATS_FUNCTIONS['save'].get(extension, _save_generic_file)
+    return SUPPORTED_FORMATS_FUNCTIONS[operation].get(extension, _save_generic_file)
 
 def _load_json_file(input_file):
     with open(input_file) as in_file:
@@ -147,13 +139,25 @@ def _load_json_file(input_file):
 def _load_pickle_file(input_file):
     return pickle.load(open(input_file, "rb"))
 
-def load_file(input_file_path, file_format='json'):
-    if file_format == 'json':
-        return _load_json_file(input_file_path)
-    elif file_format == 'pickle':
-        return _load_pickle_file(input_file_path)
+def load_file(file_path):
+    # Detect format from file name
+    _, ext = os.path.splitext(file_path)
+    load = _find_IO_function('load', ext)
+    return load(file_path)
 
 def _configure_logger(loglevel):
     """Configure logging levels."""
     logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.DEBUG)
     logging.basicConfig(level=loglevel)
+
+# TODO: Move this constant somewhere else.
+SUPPORTED_FORMATS_FUNCTIONS = {
+    'save': {
+        '.json'  : _save_as_json,
+        '.pickle': _save_as_pickle
+    },
+    'load': {
+        '.json'  : _load_json_file,
+        '.pickle': _load_pickle_file
+    }
+}

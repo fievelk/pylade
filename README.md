@@ -11,14 +11,12 @@ python train.py \
 
 python evaluate.py \
     --model model.pickle \
-    --model-format pickle \
     --test-data test_set.csv \
     --corpus-reader TwitterCorpusReader \
     --output results.json
 
 python detect.py \
     --model model.pickle \
-    --model-format pickle \
     --text "Put text here"
 ```
 

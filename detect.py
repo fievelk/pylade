@@ -27,12 +27,6 @@ def _parse_arguments():
         default='model.json'
     )
     parser.add_argument(
-    '--model-format',
-    help="Model file format (e.g. json)",
-    action="store", dest="model_file_format",
-    default='json'
-    )
-    parser.add_argument(
         '-i', '--implementation',
         help="Chosen method (e.g. CanvarTrenkle)",
         action="store", dest="implementation",
@@ -55,8 +49,7 @@ def _parse_arguments():
 
 def start_detection(arguments):
     model_file = arguments['model_file'] #json
-    model_file_format = arguments['model_file_format']
-    model = utils.load_file(model_file, file_format=model_file_format)
+    model = utils.load_file(model_file)
 
     text = arguments['text']
 

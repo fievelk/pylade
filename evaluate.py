@@ -33,12 +33,6 @@ def _parse_arguments():
         default='CavnarTrenkleImpl'
     )
     parser.add_argument(
-        '--model-format',
-        help="Model file format (e.g. json)",
-        action="store", dest="model_file_format",
-        default='json'
-    )
-    parser.add_argument(
         '-t', '--test-data',
         help="Path for test data file (e.g. test_tweets.csv). This file needs to\
               be compatible with the Corpus Reader (specified with the \
@@ -63,8 +57,7 @@ def _parse_arguments():
 
 def start_evaluation(arguments):
     model_file = arguments['model_file'] #json
-    model_file_format = arguments['model_file_format']
-    model = utils.load_file(model_file, file_format=model_file_format)
+    model = utils.load_file(model_file)
 
     test_data_file = arguments['test_data_file']
     corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
