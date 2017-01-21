@@ -100,7 +100,7 @@ class CavnarTrenkleImpl(object):
             # TODO: this only works with instances which have 'label' and 'text' keys. How could we make it more flexible for other corpora?
             if only_language and labeled_tweet['language'] != only_language:
                 continue
-            predicted_language = self._predict_language(labeled_tweet['text'], model, error_value=error_value)
+            predicted_language = self.predict_language(labeled_tweet['text'], model, error_value=error_value)
             if predicted_language == labeled_tweet['language']:
                 correct += 1
             else:
@@ -113,7 +113,7 @@ class CavnarTrenkleImpl(object):
 
         return accuracy # TODO: this should be a dictionary: {'accuracy': accuracy}
 
-    def _predict_language(self, text, training_profiles, error_value):
+    def predict_language(self, text, training_profiles, error_value):
         """
         >>> text = 'hello'
         >>> training_profiles = {\

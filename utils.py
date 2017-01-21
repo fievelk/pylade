@@ -108,6 +108,10 @@ def _save_as_json(content, output_file_path, indent=2):
     with open(output_file_path, mode='w') as f:
         f.write(json.dumps(content, indent=2))
 
+def _save_generic_file(content, output_file_path):
+    with open(output_file_path, 'w') as f:
+        f.write(content)
+
 def save_file(content, output_file_path, file_format='json'):
     """
     Save content to output file.
@@ -117,6 +121,8 @@ def save_file(content, output_file_path, file_format='json'):
         _save_as_json(content, output_file_path)
     elif file_format == 'pickle':
         _save_as_pickle(content, output_file_path)
+    else:
+        _save_generic_file(content, output_file_path)
 
 def _load_json_file(input_file):
     with open(input_file) as in_file:
