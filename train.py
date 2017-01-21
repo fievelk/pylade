@@ -19,19 +19,6 @@ import utils
     #     print("No class with that name, sorry!")
     #     raise e
 
-def _find_class_in_set(class_name, class_set):
-    try:
-        return next(class_item for class_item in class_set if class_item.__name__ == class_name )
-    except StopIteration as exception:
-        logging.error('The provided class name was not found in the available classes.')
-        raise exception
-
-def _find_corpus_reader(class_name):
-    return _find_class_in_set(class_name, utils.CORPUS_READERS)
-
-def _find_implementation(class_name):
-    return _find_class_in_set(class_name, utils.IMPLEMENTATIONS)
-
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
     parser = argparse.ArgumentParser()
@@ -81,7 +68,7 @@ def _parse_arguments():
 
 def start_training(arguments):
     training_data_file = arguments['training_data_file']
-    corpus_reader_class = _find_corpus_reader(arguments['corpus_reader_class'])
+    corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
     training_corpus = corpus_reader_class(training_data_file)
 
     # languages =  training_corpus.available_languages()
@@ -92,7 +79,8 @@ def start_training(arguments):
     output_file = arguments['model_output_file']
     output_format = arguments['model_output_format']
 
-    implementation = _find_implementation(arguments['implementation'])
+    implementation = utils.find_implementation(arguments['implementation'])
+    # TODO: `limit` should be passed as argument by CLI
     model = implementation().train(labeled_tweets, limit=5000)
     utils.save_file(model, output_file, format=output_format)
 

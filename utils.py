@@ -17,6 +17,19 @@ from cavnar_trenkle_impl import CavnarTrenkleImpl
 CORPUS_READERS = {TwitterCorpusReader}
 IMPLEMENTATIONS = {CavnarTrenkleImpl}
 
+def _find_class_in_set(class_name, class_set):
+    try:
+        return next(class_item for class_item in class_set if class_item.__name__ == class_name )
+    except StopIteration as exception:
+        logging.error('The provided class name was not found in the available classes.')
+        raise exception
+
+def find_corpus_reader(class_name):
+    return _find_class_in_set(class_name, CORPUS_READERS)
+
+def find_implementation(class_name):
+    return _find_class_in_set(class_name, IMPLEMENTATIONS)
+
 # TODO: delete
 # def language_profiles(labeled_tweets, limit=None):
 #     """
@@ -35,18 +48,18 @@ IMPLEMENTATIONS = {CavnarTrenkleImpl}
 #         language_profiles[language] = [ngram[0] for ngram in sorted(lang_ngram_freqs[language].items(), key= lambda x: (x[1], x[0]), reverse=True)[:limit]]
 #     return language_profiles
 
-def compute_text_profile(text, limit=None):
-    """
-    >>> text = 'Hello'
-    >>> compute_text_profile(text)
-    ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
-    >>> compute_text_profile(text, limit=2)
-    ['l', 'o']
-
-    """
-    text_ngram_freqs = _extract_text_ngram_freqs(text)
-    # Sort by value first, and then also by key (inverse alphabetic order) if values are equal
-    return [ngram[0] for ngram in sorted(text_ngram_freqs.items(), key=lambda x: (x[1], x[0]), reverse=True)[:limit]]
+# def compute_text_profile(text, limit=None):
+#     """
+#     >>> text = 'Hello'
+#     >>> compute_text_profile(text)
+#     ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
+#     >>> compute_text_profile(text, limit=2)
+#     ['l', 'o']
+#
+#     """
+#     text_ngram_freqs = _extract_text_ngram_freqs(text)
+#     # Sort by value first, and then also by key (inverse alphabetic order) if values are equal
+#     return [ngram[0] for ngram in sorted(text_ngram_freqs.items(), key=lambda x: (x[1], x[0]), reverse=True)[:limit]]
 
 # TODO: delete
 # def _language_ngram_frequencies(labeled_tweets):
@@ -204,16 +217,29 @@ def _save_as_json(content, output_file_path, indent=2):
     with open(output_file_path, mode='w') as f:
         f.write(json.dumps(content, indent=2))
 
-def save_file(content, output_file_path, format='json'):
+def save_file(content, output_file_path, file_format='json'):
     """
     Save content to output file.
 
     """
-    if format == 'json':
+    if file_format == 'json':
         _save_as_json(content, output_file_path)
-    elif format == 'pickle':
+    elif file_format == 'pickle':
         _save_as_pickle(content, output_file_path)
 
+def _load_json_file(input_file):
+    with open(input_file) as in_file:
+        result = json.load(in_file)
+    return result
+
+def _load_pickle_file(input_file):
+    return pickle.load(open(input_file, "rb"))
+
+def load_file(input_file_path, file_format='json'):
+    if file_format == 'json':
+        return _load_json_file(input_file_path)
+    elif file_format == 'pickle':
+        return _load_pickle_file(input_file_path)
 
 def _configure_logger(loglevel):
     """Configure logging levels."""

@@ -1,5 +1,8 @@
+from __future__ import division # Safety measure in case we extend to py2.7
+
 from collections import defaultdict
 import logging
+import sys
 
 from nltk.tokenize import wordpunct_tokenize
 from nltk.util import ngrams
@@ -81,84 +84,99 @@ class CavnarTrenkleImpl(object):
 
         return ngram_freqs
 
+    def evaluate(self, model, test_instances, only_language=None, error_value=1000):
+        """
+        Evaluate model on test data and gather results.
+        `model` is a list of training profiles for languages (see paper).
 
+        """
 
+        print("Evaluating...")
+        correct = 0
+        incorrect = 0
+        total = 0
 
-    # def implementation(self, training_profiles, test_corpus, only_language=None, error_value=1000):
-    #     logging.info("Evaluating...")
-    #     correct = 0
-    #     incorrect = 0
-    #     total = 0
-    #
-    #     for labeled_tweet in test_corpus.all_tweets():
-    #         if only_language and labeled_tweet['language'] != only_language:
-    #             continue
-    #         # if labeled_tweet['language'] == 'ar':
-    #         #     continue # Skip arabic just for test (arabic is fine)
-    #         predicted_language = predict_language(labeled_tweet['text'], training_profiles, error_value=error_value)
-    #         if predicted_language == labeled_tweet['language']:
-    #             correct += 1
-    #         else:
-    #             incorrect += 1
-    #         total += 1
-    #         print("Label: {}, Guess: {}, Correct: {}, Incorrect: {}, Total: {}".format(labeled_tweet['language'], predicted_language, correct, incorrect, total), end='\r')
-    #     print()
-    #     accuracy = correct / total
-    #     print("Accuracy: ", accuracy )
-    #
-    #     return accuracy
-    #
-    # def predict_language(self, text, training_profiles, error_value):
-    #     """
-    #     >>> text = 'hello'
-    #     >>> training_profiles = {\
-    #         'en': ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', \
-    #             'ello', 'ell', 'el', 'e'],\
-    #         'it': ['o', 'iao', 'ia', 'i', 'ciao', 'cia', 'ci', 'c', 'ao', 'a']}
-    #     >>> predict_language(text, training_profiles)
-    #     'en'
-    #
-    #     """
-    #     min_distance = sys.maxsize # Set it to a high number before iterating
-    #     predicted_language = ''
-    #
-    #     text_profile = utils.compute_text_profile(text)
-    #
-    #     for language in training_profiles:
-    #         distance = _distance(text_profile, training_profiles[language], error_value=error_value)
-    #         if distance < min_distance:
-    #             min_distance = distance
-    #             predicted_language = language
-    #
-    #     return predicted_language
-    #
-    # def _distance(self, text_profile, training_profile, error_value=1000):
-    #     """
-    #     This method compares two profiles and returns a number which represents the
-    #     distance between them. A high distance means that the language of the texts
-    #     that have been used to generate the profiles is not the same. This distance
-    #     is called "out-of-place" metric in the paper.
-    #     We usually compare a language profile (generated from a training set) to the
-    #     profile generated from a single text (e.g. a tweet or a facebook post).
-    #     Note: If a ngram is not present in the training profile, we penalize the
-    #     text profile using an arbitrary `error_value`. This value should be decided
-    #     based on tuning on the test set.
-    #
-    #     >>> text_profile = ['h', 'e', 'l', 'o', 'he']
-    #     >>> training_profile = ['h', 'e', 'l', 'o', 'he']
-    #     >>> _distance(text_profile, training_profile)
-    #     0
-    #     >>> training_profile = ['l', 'o', 'h', 'e', 'he']
-    #     >>> _distance(text_profile, training_profile)
-    #     8
-    #
-    #     """
-    #     total_distance = 0
-    #     for index, text_ngram in enumerate(text_profile):
-    #         if text_ngram in training_profile:
-    #             distance = abs(index - training_profile.index(text_ngram))
-    #         else:
-    #             distance = error_value
-    #         total_distance += distance
-    #
-    #     return total_distance
+        for labeled_tweet in test_instances:
+            # TODO: this only works with instances which have 'label' and 'text' keys. How could we make it more flexible for other corpora?
+            if only_language and labeled_tweet['language'] != only_language:
+                continue
+            predicted_language = self._predict_language(labeled_tweet['text'], model, error_value=error_value)
+            if predicted_language == labeled_tweet['language']:
+                correct += 1
+            else:
+                incorrect += 1
+            total += 1
+            print("Label: {}, Guess: {}, Correct: {}, Incorrect: {}, Total: {}".format(labeled_tweet['language'], predicted_language, correct, incorrect, total), end='\r')
+        print()
+        accuracy = correct / total
+        print("Accuracy: ", accuracy )
+
+        return accuracy # TODO: this should be a dictionary: {'accuracy': accuracy}
+
+    def _predict_language(self, text, training_profiles, error_value):
+        """
+        >>> text = 'hello'
+        >>> training_profiles = {\
+            'en': ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', \
+                'ello', 'ell', 'el', 'e'],\
+            'it': ['o', 'iao', 'ia', 'i', 'ciao', 'cia', 'ci', 'c', 'ao', 'a']}
+        >>> predict_language(text, training_profiles)
+        'en'
+
+        """
+        min_distance = sys.maxsize # Set it to a high number before iterating
+        predicted_language = ''
+
+        text_profile = self._compute_text_profile(text)
+
+        for language in training_profiles:
+            distance = self._distance(text_profile, training_profiles[language], error_value=error_value)
+            if distance < min_distance:
+                min_distance = distance
+                predicted_language = language
+
+        return predicted_language
+
+    def _compute_text_profile(self, text, limit=None):
+        """
+        >>> text = 'Hello'
+        >>> compute_text_profile(text)
+        ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
+        >>> compute_text_profile(text, limit=2)
+        ['l', 'o']
+
+        """
+        text_ngram_freqs = self._extract_text_ngram_freqs(text)
+        # Sort by value first, and then also by key (inverse alphabetic order) if values are equal
+        return [ngram[0] for ngram in sorted(text_ngram_freqs.items(), key=lambda x: (x[1], x[0]), reverse=True)[:limit]]
+
+    def _distance(self, text_profile, training_profile, error_value=1000):
+        """
+        This method compares two profiles and returns a number which represents the
+        distance between them. A high distance means that the language of the texts
+        that have been used to generate the profiles is not the same. This distance
+        is called "out-of-place" metric in the paper.
+        We usually compare a language profile (generated from a training set) to the
+        profile generated from a single text (e.g. a tweet or a facebook post).
+        Note: If a ngram is not present in the training profile, we penalize the
+        text profile using an arbitrary `error_value`. This value should be decided
+        based on tuning on the test set.
+
+        >>> text_profile = ['h', 'e', 'l', 'o', 'he']
+        >>> training_profile = ['h', 'e', 'l', 'o', 'he']
+        >>> _distance(text_profile, training_profile)
+        0
+        >>> training_profile = ['l', 'o', 'h', 'e', 'he']
+        >>> _distance(text_profile, training_profile)
+        8
+
+        """
+        total_distance = 0
+        for index, text_ngram in enumerate(text_profile):
+            if text_ngram in training_profile:
+                distance = abs(index - training_profile.index(text_ngram))
+            else:
+                distance = error_value
+            total_distance += distance
+
+        return total_distance
