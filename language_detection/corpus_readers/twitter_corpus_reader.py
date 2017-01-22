@@ -23,7 +23,7 @@ import csv
 import sys
 import pdb
 
-import utils
+from language_detection import utils
 
 # AVAILABLE_LANGUAGES = set({
 #     'ar', 'ar_LATN', 'az', 'bg', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'dv',

@@ -6,7 +6,7 @@ import sys
 from nltk.tokenize import wordpunct_tokenize
 from nltk.util import ngrams
 
-import utils
+from language_detection import utils
 
 # TODO: Store instance variables (e.g. model)
 class CavnarTrenkleImpl(object):
