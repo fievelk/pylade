@@ -1,7 +1,6 @@
 from __future__ import division # Safety measure in case we extend to py2.7
 
 from collections import defaultdict
-import logging
 import sys
 
 from nltk.tokenize import wordpunct_tokenize

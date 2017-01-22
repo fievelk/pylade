@@ -72,7 +72,6 @@ def start_evaluation(arguments, evaluation_arguments):
     test_instances = test_corpus.all_tweets() # TODO: rename this method into 'all_instances', 'all_rows' or similarly generic
 
     logging.info("Evaluating implementation of {}.".format(implementation.__name__))
-    # TODO: At the moment, results are just accuracy (float). We should foresee a dictionary of key-values (precision, recall, accuracy, ...)
     # TODO: Should we only get instances of specified language in advance? Something like:
     #   test_instances = test_corpus.tweets_with_language('it')
     # This is basically what we are doing, but later (spending more memory) I think

@@ -72,11 +72,12 @@ class TwitterCorpusReader(object):
                 yield row
 
     def tweets_with_language(self, languages, limit=0):
-        """Read the corpus and returns a generator for tweets in a specific
+        """Read the corpus and return a generator for tweets in a specific
         language.
 
         """
         # for tweet in self.all_tweets(limit=limit):
+        # TODO: Fix. This is not good
         if not limit:
             limit = sys.maxsize
 

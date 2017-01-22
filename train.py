@@ -9,19 +9,8 @@ import sys
 
 import utils
 
-# def _str_to_class(class_name):
-    # return next(corpus_reader for corpus_reader in CORPUS_READERS if corpus_reader.__name__ == class_name )
-    # try:
-    #     # return eval(class_name)
-    #     return globals()[class_name]
-    # except NameError as e:
-    #     # TODO: Use logging
-    #     print("No class with that name, sorry!")
-    #     raise e
-
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
-
     description = "Train a language detection model using a training corpus."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(

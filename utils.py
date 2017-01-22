@@ -2,7 +2,6 @@
 #! -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from copy import deepcopy
 import json
 import logging
 import os
