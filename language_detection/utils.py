@@ -10,8 +10,8 @@ import pickle
 # from nltk.util import ngrams
 from nltk.tokenize import wordpunct_tokenize # TODO: delete
 
-from twitter_corpus_reader import TwitterCorpusReader
-from cavnar_trenkle_impl import CavnarTrenkleImpl
+from language_detection.corpus_readers.twitter_corpus_reader import TwitterCorpusReader
+from language_detection.cavnar_trenkle_impl import CavnarTrenkleImpl
 
 CORPUS_READERS = {TwitterCorpusReader}
 IMPLEMENTATIONS = {CavnarTrenkleImpl}

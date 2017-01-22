@@ -4,7 +4,7 @@
 import argparse
 import logging
 
-import utils
+from language_detection import utils
 
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
