@@ -9,7 +9,7 @@ from nltk.util import ngrams
 
 import utils
 
-# TODO: Do I need a class? It seems that it does not have any state/variable to store.
+# TODO: Store instance variables (e.g. model)
 class CavnarTrenkleImpl(object):
     def __init__(self):
         pass
@@ -85,8 +85,8 @@ class CavnarTrenkleImpl(object):
         True
         """
         tokens = wordpunct_tokenize(text.lower()) # Force lower case
-        #TODO: Eliminare numeri e punteggiatura
-        #TODO: Usare il twitter tokenizer?
+        #TODO: Delete numbers and punctuation
+        #TODO: Should we use nltk twitter tokenizer?
 
         ngram_freqs = defaultdict(int)
         for token in tokens:
@@ -98,21 +98,61 @@ class CavnarTrenkleImpl(object):
 
         return ngram_freqs
 
-    def evaluate(self, model, test_instances, only_language=None, error_value=1000):
+    # def evaluate(self, model, test_instances, languages=None, error_values=None, split_languages=False, output_file=None):
+    def evaluate(self, model, test_instances, languages=None, error_values=None, split_languages=False):
         """
         Evaluate model on test data and gather results.
         `model` is a list of training profiles for languages (see paper).
 
+        `languages`: when specified, the model is only evaluated on test
+        instances with these labels (e.g. 'it').
+        `split_languages`: if True, each language in `languages` is evaluated
+        separately and results will be split by language. If False (default)
+        results are computed over all instances belonging to `languages`.
+
+        NOTE: if you want to use test_instances multiple times, they need to be
+        stored in a list. Since they are a generator object, they would be
+        exhausted after the first iteration.
+
         """
+        if error_values is None:
+            error_values = [8000]
+
+        # Make sure it is a list of integers:
+        if isinstance(error_values, (int, float, str)):
+            error_values = [int(val) for val in [error_values]]
+
+        # Make sure that test_instances is a list when we need multiple iterations
+        if len(error_values) > 1 or split_languages is True:
+            test_instances = list(test_instances)
 
         print("Evaluating...")
+        results = defaultdict(lambda: defaultdict(float))
+
+        if languages and split_languages is True:
+            for lang in languages: # TODO: Refactor duplicated code below
+                for err_val in error_values:
+                    print("Evaluating results for LANG: {}, ERR_VAL: {}".format(lang, err_val))
+                    accuracy = self._evaluate_for_languages(test_instances, [lang], model, err_val)
+                    results[lang][str(err_val)] = accuracy
+                    single_result = {lang: {str(err_val): accuracy}}
+                    yield single_result
+        else:
+            for err_val in error_values:
+                tested_langs = ' '.join(languages)
+                print("Evaluating results for [{}], ERR_VAL: {}".format(tested_langs, err_val))
+                accuracy = self._evaluate_for_languages(test_instances, languages, model, err_val)
+                results[tested_langs][str(err_val)] = accuracy
+                single_result = {tested_langs: {str(err_val): accuracy}}
+                yield single_result
+
+    def _evaluate_for_languages(self, test_instances, languages, model, error_value):
         correct = 0
         incorrect = 0
         total = 0
-
         for labeled_tweet in test_instances:
-            # TODO: this only works with instances which have 'label' and 'text' keys. How could we make it more flexible for other corpora?
-            if only_language and labeled_tweet['language'] != only_language:
+            # Skip instances with different languages
+            if labeled_tweet['language'] not in languages:
                 continue
             predicted_language = self.predict_language(labeled_tweet['text'], model, error_value=error_value)
             if predicted_language == labeled_tweet['language']:
@@ -120,11 +160,11 @@ class CavnarTrenkleImpl(object):
             else:
                 incorrect += 1
             total += 1
-            print("Label: {}, Guess: {}, Correct: {}, Incorrect: {}, Total: {}".format(labeled_tweet['language'], predicted_language, correct, incorrect, total), end='\r')
+
+            print("Label: {}, Guess: {}, Correct: {}, Incorrect: {}, Total: {}   ".format(labeled_tweet['language'], predicted_language, correct, incorrect, total), end='\r', flush=True)
         print()
         accuracy = correct / total
-        print("Accuracy: ", accuracy )
-
+        # single_result = {languages: {str(err_val): accuracy}}
         return accuracy # TODO: this should be a dictionary: {'accuracy': accuracy}
 
     def predict_language(self, text, training_profiles, error_value):

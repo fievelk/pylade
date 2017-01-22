@@ -51,60 +51,40 @@ def _parse_arguments():
         default='results.json'
     )
 
-    return vars(parser.parse_args())
+    args, unknown_args = parser.parse_known_args()
+    unknown_args_dict = utils.parse_unknown_args_with_values(unknown_args)
 
-def start_evaluation(arguments):
-    model_file = arguments['model']
-    model = utils.load_file(model_file)
+    return vars(args), unknown_args_dict
 
-    test_data_file = arguments['test-data']
-    corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
+def start_evaluation(arguments, evaluation_arguments):
+    model_file          = arguments['model']
+    test_data_file      = arguments['test-data']
+    corpus_class_name   = arguments['corpus_reader_class']
+    output_file         = arguments['results_output_file']
+    implementation_name = arguments['implementation']
+
+    corpus_reader_class = utils.find_corpus_reader(corpus_class_name)
     test_corpus = corpus_reader_class(test_data_file)
+    model = utils.load_file(model_file)
+    implementation = utils.find_implementation(implementation_name)
 
-    # languages =  training_corpus.available_languages() # Find a way to pass all possible labels
     logging.info("Retrieving all documents from test data...")
     test_instances = test_corpus.all_tweets() # TODO: rename this method into 'all_instances', 'all_rows' or similarly generic
 
-    output_file = arguments['results_output_file']
-
-    implementation = utils.find_implementation(arguments['implementation'])
     logging.info("Evaluating implementation of {}.".format(implementation.__name__))
-
     # TODO: At the moment, results are just accuracy (float). We should foresee a dictionary of key-values (precision, recall, accuracy, ...)
-    # TODO: `only_language` and `error_value` should be kwargs explicitly passed by command-line.
-    # This is because they can differ from implementation to implementation
-    results = implementation().evaluate(model, test_instances, only_language=None, error_value=8000)
-    utils.save_file(results, output_file)
+    # TODO: Should we only get instances of specified language in advance? Something like:
+    #   test_instances = test_corpus.tweets_with_language('it')
+    # This is basically what we are doing, but later (spending more memory) I think
 
-
-# TODO: This was used to test several implementations using several parameters.
-# How can we restore something similar, taking parameters from CLI?
-# def evaluate_implementation(implementation, error_values, languages, output_file=None, *args, **kwargs):
-#     """
-#     Evaluate language identification implementation.
-#
-#     """
-#     print("Evaluating implementation of {}.".format(implementation.__name__))
-#     print("Error values: ", error_values)
-#     print("Languages: ", languages)
-#     print()
-#
-#     results = defaultdict(lambda: defaultdict(float))
-#     for lang in languages:
-#         for err_val in error_values:
-#             print("Evaluating results for [LANG: {}, ERR_VAL: {}]".format(lang, err_val))
-#             # Only evaluate tweets with this language
-#             kwargs['only_language'] = lang
-#             acc = implementation(*args, **kwargs, error_value=err_val)
-#             single_result = {lang: {str(err_val): acc}}
-#             results[lang][str(err_val)] = acc
-#             if output_file:
-#                 _save_result(output_file, single_result)
-#     return results
-
-
+    # NOTE: if you want to use test_instances multiple times, note that they need
+    # to be stored in a list, because they have to be regenerated
+    # test_instances = list(test_instances)
+    results = implementation().evaluate(model, test_instances, **evaluation_arguments)
+    for result in results:
+        utils._save_result(result, output_file)
 
 if __name__ == '__main__':
-    arguments = _parse_arguments()
+    arguments, impl_arguments = _parse_arguments()
     utils._configure_logger(arguments['loglevel'])
-    start_evaluation(arguments)
+    start_evaluation(arguments, impl_arguments)

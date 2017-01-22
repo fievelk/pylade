@@ -43,7 +43,6 @@ def _nested_defaultdict():
     """
     return defaultdict(int)
 
-
 def _merge_dictionaries_summing(first_dict, second_dict):
     """
     Merge two dictionaries summing values with the same key. Returns the enriched
@@ -54,35 +53,11 @@ def _merge_dictionaries_summing(first_dict, second_dict):
     for k, v in second_dict.items():
         first_dict[k] += v
     return first_dict
-#
-# # Results and evaluation
-#
-# def evaluate_implementation(implementation, error_values, languages, output_file=None, *args, **kwargs):
-#     """
-#     Evaluate language identification implementation.
-#
-#     """
-#     print("Evaluating implementation of {}.".format(implementation.__name__))
-#     print("Error values: ", error_values)
-#     print("Languages: ", languages)
-#     print()
-#
-#     results = defaultdict(lambda: defaultdict(float))
-#     for lang in languages:
-#         for err_val in error_values:
-#             print("Evaluating results for [LANG: {}, ERR_VAL: {}]".format(lang, err_val))
-#             # Only evaluate tweets with this language
-#             kwargs['only_language'] = lang
-#             acc = implementation(*args, **kwargs, error_value=err_val)
-#             single_result = {lang: {str(err_val): acc}}
-#             results[lang][str(err_val)] = acc
-#             if output_file:
-#                 _save_result(output_file, single_result)
-#     return results
 
-def _save_result(output_file, result):
+def _save_result(result, output_file):
     res_list = []
-    if not os.path.isfile(output_file):
+    # If file does not exist or it is empty
+    if not os.path.isfile(output_file) or os.path.getsize(output_file) == 0:
         res_list.append(result)
         with open(output_file, mode='w') as f:
             f.write(json.dumps(result, indent=2))
@@ -149,6 +124,35 @@ def _configure_logger(loglevel):
     """Configure logging levels."""
     logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.DEBUG)
     logging.basicConfig(level=loglevel)
+
+def parse_unknown_args_with_values(unknown_args):
+    """
+    Parse a list of strings formatted as command-line arguments. Return a
+    dictionary of argument:values.
+    NOTE: Every key must be preceeded by '--'. For semplicity, every value must
+    be preceeded by a key. A NameError exception is raised otherwise.
+    NOTE: Only arguments with values are parsed. Arguments without values (flags)
+    are not considered.
+
+    >>> d = parse_unknown_args_with_values(['--languages', 'it', '--error_values', '1000', '2000'])
+    >>> d == {'languages': 'it', 'error_values': ['1000', '2000']}
+    True
+
+    """
+    dictionary = {}
+    for arg in unknown_args:
+        if arg.startswith('--'): # Key for option
+            opt = arg[2:]
+            dictionary[opt] = []
+        else: # Value for the previously encountered key
+            try:
+                dictionary[opt].append(arg)
+            except NameError as e:
+                logging.error("Please specify the key for {} value.".format(arg))
+                raise
+    ags_with_values = {k: (v if (len(v) > 1) else v[0]) for (k, v) in dictionary.items() if v}
+    return ags_with_values
+
 
 # TODO: Move this constant somewhere else.
 SUPPORTED_FORMATS_FUNCTIONS = {
