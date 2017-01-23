@@ -66,8 +66,10 @@ def start_training(arguments):
     model = implementation().train(labeled_tweets, limit=5000)
     utils.save_file(model, output_file)
 
-
-if __name__ == '__main__':
+def main():
     arguments = _parse_arguments()
     utils._configure_logger(arguments['loglevel'])
     start_training(arguments)
+
+if __name__ == '__main__':
+    main()
