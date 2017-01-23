@@ -83,7 +83,10 @@ def start_evaluation(arguments, evaluation_arguments):
     for result in results:
         utils._save_result(result, output_file)
 
-if __name__ == '__main__':
+def main():
     arguments, impl_arguments = _parse_arguments()
     utils._configure_logger(arguments['loglevel'])
     start_evaluation(arguments, impl_arguments)
+
+if __name__ == '__main__':
+    main()

@@ -60,7 +60,10 @@ def start_detection(arguments):
 
     print(results)
 
-if __name__ == '__main__':
+def main():
     arguments = _parse_arguments()
     utils._configure_logger(arguments['loglevel'])
     start_detection(arguments)
+
+if __name__ == '__main__':
+    main()
