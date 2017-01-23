@@ -10,9 +10,9 @@ setup(name='language_detection',
       packages=['language_detection'],
       entry_points = {
         'console_scripts': [
-            'langd_train=language_detection.train:main',
-            'langd_eval=language_detection.evaluate:main',
-            'langd=language_detection.detect:main',
+            'langd_train=language_detection.console_scripts.train:main',
+            'langd_eval=language_detection.console_scripts.evaluate:main',
+            'langd=language_detection.console_scripts.detect:main',
             ],
         },
       zip_safe=False)
