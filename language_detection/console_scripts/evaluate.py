@@ -2,6 +2,7 @@
 # #! -*- coding: utf-8 -*-
 
 import argparse
+import json
 import logging
 
 from language_detection import utils
@@ -50,13 +51,17 @@ def _parse_arguments():
         action="store", dest="results_output_file",
         default='results.json'
     )
+    # This argument is a json object which will be mapped to dict
+    parser.add_argument(
+        '--eval-args',
+        help="Arguments for the evaluation method (JSON format)",
+        action="store", dest="eval_args",
+        type=json.loads
+    )
 
-    args, unknown_args = parser.parse_known_args()
-    unknown_args_dict = utils.parse_unknown_args_with_values(unknown_args)
+    return vars(parser.parse_args())
 
-    return vars(args), unknown_args_dict
-
-def start_evaluation(arguments, evaluation_arguments):
+def start_evaluation(arguments):
     model_file          = arguments['model']
     test_data_file      = arguments['test-data']
     corpus_class_name   = arguments['corpus_reader_class']
@@ -76,17 +81,18 @@ def start_evaluation(arguments, evaluation_arguments):
     #   test_instances = test_corpus.tweets_with_language('it')
     # This is basically what we are doing, but later (spending more memory) I think
 
-    # NOTE: if you want to use test_instances multiple times, note that they need
-    # to be stored in a list, because they have to be regenerated
+    # NOTE: if you want to use test_instances multiple times, they need to be
+    # stored in a list, because they have to be regenerated
     # test_instances = list(test_instances)
+    evaluation_arguments = utils.convert_unknown_arguments(arguments['eval_args']) or {}
     results = implementation().evaluate(model, test_instances, **evaluation_arguments)
     for result in results:
         utils._save_result(result, output_file)
 
 def main():
-    arguments, impl_arguments = _parse_arguments()
+    arguments = _parse_arguments()
     utils._configure_logger(arguments['loglevel'])
-    start_evaluation(arguments, impl_arguments)
+    start_evaluation(arguments)
 
 if __name__ == '__main__':
     main()

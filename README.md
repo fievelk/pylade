@@ -25,6 +25,7 @@ langd_train \
     --implementation CavnarTrenkleImpl \
     --corpus-reader TwitterCorpusReader \
     --output model.json
+    --train-args '{"limit": 5000, "verbose": "True"}'
 ```
 
 - Evaluate a model on a test set
@@ -35,8 +36,7 @@ langd_eval \
     test_set.csv \
     --corpus-reader TwitterCorpusReader \
     --output results.json
-    --languages it de \
-    --error_values 6000 8000
+    --eval-args '{"languages": ["it", "de"], "error_values": 8000}'
 ```
 
 - Detect language of a text, using a trained model
@@ -47,6 +47,7 @@ langd \
     "Put text here" \
     --implementation CavnarTrenkleImpl \
     --output detected_language.txt
+    --predict-args '{"error_value": 8000}'
 ```
 
 ## Tests

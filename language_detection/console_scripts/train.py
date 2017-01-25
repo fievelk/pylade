@@ -4,6 +4,7 @@
 from __future__ import division
 from collections import defaultdict
 import argparse
+import json
 import logging
 import sys
 
@@ -46,6 +47,13 @@ def _parse_arguments():
         action="store", dest="model_output_file",
         default='model.json'
     )
+    # This argument is a json object which will be mapped to dict
+    parser.add_argument(
+        '--train-args',
+        help="Arguments for the training method (JSON format)",
+        action="store", dest="train_args",
+        type=json.loads
+    )
 
     return vars(parser.parse_args())
 
@@ -62,8 +70,9 @@ def start_training(arguments):
 
     implementation = utils.find_implementation(arguments['implementation'])
     logging.info("Training the model. This could take some time...")
-    # TODO: `limit` should be passed as argument by CLI
-    model = implementation().train(labeled_tweets, limit=5000)
+
+    training_arguments = utils.convert_unknown_arguments(arguments['train_args']) or {}
+    model = implementation().train(labeled_tweets, **training_arguments)
     utils.save_file(model, output_file)
 
 def main():
