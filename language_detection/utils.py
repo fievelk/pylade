@@ -124,34 +124,31 @@ def _configure_logger(loglevel):
     logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.DEBUG)
     logging.basicConfig(level=loglevel)
 
-def parse_unknown_args_with_values(unknown_args):
-    """
-    Parse a list of strings formatted as command-line arguments. Return a
-    dictionary of argument:values.
-    NOTE: Every key must be preceeded by '--'. For semplicity, every value must
-    be preceeded by a key. A NameError exception is raised otherwise.
-    NOTE: Only arguments with values are parsed. Arguments without values (flags)
-    are not considered.
+# def _is_number(n):
+#     try:
+#         float(n)
+#         return True
+#     except ValueError:
+#         return False
 
-    >>> d = parse_unknown_args_with_values(['--languages', 'it', '--error_values', '1000', '2000'])
-    >>> d == {'languages': 'it', 'error_values': ['1000', '2000']}
-    True
+def _is_true(value):
+    return value in ['True', 'true']
 
-    """
-    dictionary = {}
-    for arg in unknown_args:
-        if arg.startswith('--'): # Key for option
-            opt = arg[2:]
-            dictionary[opt] = []
-        else: # Value for the previously encountered key
-            try:
-                dictionary[opt].append(arg)
-            except NameError as e:
-                logging.error("Please specify the key for {} value.".format(arg))
-                raise
-    ags_with_values = {k: (v if (len(v) > 1) else v[0]) for (k, v) in dictionary.items() if v}
-    return ags_with_values
+def _is_false(value):
+    return value in ['False', 'false']
 
+def convert_unknown_arguments(dictionary):
+    """Digits are automatically evaluated by json. We need to evaluate booleans."""
+    if not dictionary:
+        return
+    for k,v in dictionary.items():
+        # if v.isdigit():
+        #     dictionary[k] = int(v)
+        if _is_true(v):
+            dictionary[k] = True
+        elif _is_false(v):
+            dictionary[k] = False
+    return dictionary
 
 # TODO: Move this constant somewhere else.
 SUPPORTED_FORMATS_FUNCTIONS = {

@@ -3,6 +3,7 @@
 
 import argparse
 import logging
+import json
 
 from language_detection import utils
 
@@ -40,6 +41,13 @@ def _parse_arguments():
         action="store", dest="output_file",
         default=None
     )
+    # This argument is a json object which will be mapped to dict
+    parser.add_argument(
+        '--predict-args',
+        help="Arguments for the prediction method (JSON format)",
+        action="store", dest="predict_args",
+        type=json.loads
+    )
 
     return vars(parser.parse_args())
 
@@ -51,10 +59,11 @@ def start_detection(arguments):
     implementation = utils.find_implementation(arguments['implementation'])
     # implementation = implementation(model=model, error_value=error_value) # TODO: implement this kind of constructor
 
-    # NOTE: `error_value` should be explicitly passed from command-line. It should
-    # in general be equal to the value used for testing.
+    # NOTE: `error_value` should in general be equal to the value used for testing.
+    prediction_arguments = utils.convert_unknown_arguments(arguments['predict_args']) or {}
+
     logging.info("Identifying language...")
-    results = implementation().predict_language(text, model, error_value=8000)
+    results = implementation().predict_language(text, model, **prediction_arguments)
     if output_file:
         utils.save_file(results, output_file)
 

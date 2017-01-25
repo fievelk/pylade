@@ -14,14 +14,21 @@ class CavnarTrenkleImpl(object):
         pass
 
     # TODO: rename this method?
-    def train(self, labeled_instances, limit=None):
+    def train(self, labeled_instances, limit=None, verbose=False):
         """
         A profile is a list of ngrams sorted in reverse order (from the most
         frequent to the less frequent). Each language has its own list (profile).
         This method returns a dictionary in which each key is a language whose
         value is a list of ngrams (the language profile).
 
+        `limit`: the number of entries in the training language profiles. Less
+        entries make training faster, but it's better to keep a balance between
+        speed and accuracy.
+
         """
+        if verbose:
+            print("Training. Limit: {}".format(limit))
+
         language_profiles = dict()
         languages_ngram_freqs = self._languages_ngram_frequencies(labeled_instances)
         print("Sorting language profiles in lists")
@@ -132,26 +139,28 @@ class CavnarTrenkleImpl(object):
             for lang in languages: # TODO: Refactor duplicated code below
                 for err_val in error_values:
                     print("Evaluating results for LANG: {}, ERR_VAL: {}".format(lang, err_val))
-                    accuracy = self._evaluate_for_languages(test_instances, [lang], model, err_val)
+                    accuracy = self._evaluate_for_languages(test_instances, model, err_val, [lang])
                     results[lang][str(err_val)] = accuracy
                     single_result = {lang: {str(err_val): accuracy}}
                     yield single_result
         else:
+            tested_langs = ' '.join(languages) if languages else 'ALL'
             for err_val in error_values:
-                tested_langs = ' '.join(languages)
-                print("Evaluating results for [{}], ERR_VAL: {}".format(tested_langs, err_val))
-                accuracy = self._evaluate_for_languages(test_instances, languages, model, err_val)
+                print("Evaluating results for [{}], ERR_VAL: {}".format(tested_langs, err_val, languages))
+                accuracy = self._evaluate_for_languages(test_instances, model, err_val)
                 results[tested_langs][str(err_val)] = accuracy
                 single_result = {tested_langs: {str(err_val): accuracy}}
                 yield single_result
 
-    def _evaluate_for_languages(self, test_instances, languages, model, error_value):
+    def _evaluate_for_languages(self, test_instances, model, error_value, languages=None):
         correct = 0
         incorrect = 0
         total = 0
         for labeled_tweet in test_instances:
             # Skip instances with different languages
-            if labeled_tweet['language'] not in languages:
+            # TODO: This would not be necessary if we could use only instances
+            # with specific labels (a subset of test_instances). To be fixed.
+            if languages and labeled_tweet['language'] not in languages:
                 continue
             predicted_language = self.predict_language(labeled_tweet['text'], model, error_value=error_value)
             if predicted_language == labeled_tweet['language']:
@@ -166,7 +175,7 @@ class CavnarTrenkleImpl(object):
         # single_result = {languages: {str(err_val): accuracy}}
         return accuracy # TODO: this should be a dictionary: {'accuracy': accuracy}
 
-    def predict_language(self, text, training_profiles, error_value):
+    def predict_language(self, text, training_profiles, error_value=8000):
         """
         >>> text = 'hello'
         >>> training_profiles = {\
@@ -179,7 +188,7 @@ class CavnarTrenkleImpl(object):
         """
         min_distance = sys.maxsize # Set it to a high number before iterating
         predicted_language = ''
-
+        print(error_value)
         text_profile = self._compute_text_profile(text)
 
         for language in training_profiles:
