@@ -42,10 +42,11 @@ class CavnarTrenkleImpl(object):
 
     def _compute_text_profile(self, text, limit=None):
         """
+        >>> implementation = CavnarTrenkleImpl()
         >>> text = 'Hello'
-        >>> compute_text_profile(text)
+        >>> implementation._compute_text_profile(text)
         ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
-        >>> compute_text_profile(text, limit=2)
+        >>> implementation._compute_text_profile(text, limit=2)
         ['l', 'o']
 
         """
@@ -56,8 +57,9 @@ class CavnarTrenkleImpl(object):
         """
         Compute ngram frequencies for each language in the corpus.
 
+        >>> implementation = CavnarTrenkleImpl()
         >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
-        >>> lang_ngram_freqs = _languages_ngram_frequencies(tweets)
+        >>> lang_ngram_freqs = implementation._languages_ngram_frequencies(tweets)
         >>> lang_ngram_freqs == {\
             'it': {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, \
                 'ia': 1, 'ao': 1, 'cia': 1, 'iao': 1, 'ciao': 1}, \
@@ -81,14 +83,16 @@ class CavnarTrenkleImpl(object):
         length (from 1 to 5). Compute how many times each of these ngrams occur
         in the text. Then return a dictionary of { ngram: frequencies }.
 
-        >>> ngrams = _extract_text_ngram_freqs("HeLLo")
+        >>> implementation = CavnarTrenkleImpl()
+        >>> ngrams = implementation._extract_text_ngram_freqs("HeLLo")
         >>> ngrams == {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, \
             'lo': 1, 'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}
         True
-        >>> ngrams = _extract_text_ngram_freqs("CIAO")
+        >>> ngrams = implementation._extract_text_ngram_freqs("CIAO")
         >>> ngrams == {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, 'ia': 1, 'ao': 1, \
             'cia': 1, 'iao': 1, 'ciao': 1}
         True
+
         """
         tokens = wordpunct_tokenize(text.lower()) # Force lower case
         #TODO: Delete numbers and punctuation
@@ -177,18 +181,26 @@ class CavnarTrenkleImpl(object):
 
     def predict_language(self, text, training_profiles, error_value=8000):
         """
+        >>> implementation = CavnarTrenkleImpl()
         >>> text = 'hello'
         >>> training_profiles = {\
             'en': ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', \
                 'ello', 'ell', 'el', 'e'],\
             'it': ['o', 'iao', 'ia', 'i', 'ciao', 'cia', 'ci', 'c', 'ao', 'a']}
-        >>> predict_language(text, training_profiles)
+        >>> implementation.predict_language(text, training_profiles)
         'en'
+
+        NOTE: This method could be improved by simply iterating over distances and
+        discarding them when they are smaller than the previous one. This would
+        not allow us to reuse `predict_language_scores` here.
+
+        NOTE: This is the same as:
+            lang_distances = self.predict_language_scores(text, training_profiles, error_value)
+            min(lang_distances, key=lang_distances.get)
 
         """
         min_distance = sys.maxsize # Set it to a high number before iterating
         predicted_language = ''
-        print(error_value)
         text_profile = self._compute_text_profile(text)
 
         for language in training_profiles:
@@ -213,10 +225,11 @@ class CavnarTrenkleImpl(object):
 
         >>> text_profile = ['h', 'e', 'l', 'o', 'he']
         >>> training_profile = ['h', 'e', 'l', 'o', 'he']
-        >>> _distance(text_profile, training_profile)
+        >>> implementation = CavnarTrenkleImpl()
+        >>> implementation._distance(text_profile, training_profile)
         0
         >>> training_profile = ['l', 'o', 'h', 'e', 'he']
-        >>> _distance(text_profile, training_profile)
+        >>> implementation._distance(text_profile, training_profile)
         8
 
         """
