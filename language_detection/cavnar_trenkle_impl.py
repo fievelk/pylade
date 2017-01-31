@@ -71,7 +71,7 @@ class CavnarTrenkleImpl(object):
         for tweet in labeled_tweets:
               lang = tweet['language']
               tweet_ngram_freqs = self._extract_text_ngram_freqs(tweet['text'])
-              utils._merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
+              utils.merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
 
         return freqs
 

@@ -42,7 +42,7 @@ def _nested_defaultdict():
     """
     return defaultdict(int)
 
-def _merge_dictionaries_summing(first_dict, second_dict):
+def merge_dictionaries_summing(first_dict, second_dict):
     """
     Merge two dictionaries summing values with the same key. Returns the enriched
     version of the first dictionary (so it works in place).

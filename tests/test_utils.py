@@ -1,7 +1,23 @@
+from collections import defaultdict
+
 from language_detection import utils
 
-def test_parse_unknown_args_with_values():
-    arguments = ['--languages', 'it', '--error_values', '1000', '2000']
-    expected = {'languages': 'it', 'error_values': ['1000', '2000']}
+class TestUtils:
+    def test_merge_dictionaries_summing(self):
+        dict_a = {'a': 5, 'b': 0, 'c': 13}
+        defaultdict_a = defaultdict(int)
 
-    assert utils.parse_unknown_args_with_values(arguments) == expected
+        for k, v in dict_a.items():
+            defaultdict_a[k] = v
+
+        dict_b = {'a': 2, 'c': 1, 'd': 4}
+        defaultdict_b = defaultdict(int)
+        for k, v in dict_b.items():
+            defaultdict_b[k] = v
+
+        dict_expected = {'a': 7, 'b': 0, 'c': 14, 'd': 4}
+        defaultdict_expected = defaultdict(int)
+        for k, v in dict_expected.items():
+            defaultdict_expected[k] = v
+
+        assert utils.merge_dictionaries_summing(defaultdict_a, defaultdict_b) == defaultdict_expected
