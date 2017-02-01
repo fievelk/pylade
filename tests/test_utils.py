@@ -21,3 +21,9 @@ class TestUtils:
             defaultdict_expected[k] = v
 
         assert utils.merge_dictionaries_summing(defaultdict_a, defaultdict_b) == defaultdict_expected
+
+    def test_convert_unknown_arguments(self):
+        dictionary = {"limit": 5000, "verbose": "True"}
+        expected = {"limit": 5000, "verbose": True}
+
+        assert utils.convert_unknown_arguments(dictionary) == expected
