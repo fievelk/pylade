@@ -7,28 +7,6 @@ import logging
 import os
 import pickle
 
-# from nltk.util import ngrams
-from nltk.tokenize import wordpunct_tokenize # TODO: delete
-
-from language_detection.corpus_readers.twitter_corpus_reader import TwitterCorpusReader
-from language_detection.cavnar_trenkle_impl import CavnarTrenkleImpl
-
-CORPUS_READERS = {TwitterCorpusReader}
-IMPLEMENTATIONS = {CavnarTrenkleImpl}
-
-def _find_class_in_set(class_name, class_set):
-    try:
-        return next(class_item for class_item in class_set if class_item.__name__ == class_name )
-    except StopIteration as exception:
-        logging.error('The provided class name was not found in the available classes.')
-        raise exception
-
-def find_corpus_reader(class_name):
-    return _find_class_in_set(class_name, CORPUS_READERS)
-
-def find_implementation(class_name):
-    return _find_class_in_set(class_name, IMPLEMENTATIONS)
-
 def _nested_defaultdict():
     """
     Note: this function is defined in order to avoid Pickle errors:

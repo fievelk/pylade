@@ -6,6 +6,7 @@ import logging
 import json
 
 from language_detection import utils
+from language_detection import allowed_classes
 
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
@@ -56,7 +57,7 @@ def start_detection(arguments):
     model = utils.load_file(model_file)
     text = arguments['text']
     output_file = arguments['output_file']
-    implementation = utils.find_implementation(arguments['implementation'])
+    implementation = allowed_classes.find_implementation(arguments['implementation'])
     # implementation = implementation(model=model, error_value=error_value) # TODO: implement this kind of constructor
 
     # NOTE: `error_value` should in general be equal to the value used for testing.

@@ -9,6 +9,7 @@ import logging
 import sys
 
 from language_detection import utils
+from language_detection import allowed_classes
 
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
@@ -59,7 +60,7 @@ def _parse_arguments():
 
 def start_training(arguments):
     training_data_file = arguments['training-data']
-    corpus_reader_class = utils.find_corpus_reader(arguments['corpus_reader_class'])
+    corpus_reader_class = allowed_classes.find_corpus_reader(arguments['corpus_reader_class'])
     training_corpus = corpus_reader_class(training_data_file)
 
     # languages =  training_corpus.available_languages()
@@ -68,7 +69,7 @@ def start_training(arguments):
 
     output_file = arguments['model_output_file']
 
-    implementation = utils.find_implementation(arguments['implementation'])
+    implementation = allowed_classes.find_implementation(arguments['implementation'])
     logging.info("Training the model. This could take some time...")
 
     training_arguments = utils.convert_unknown_arguments(arguments['train_args']) or {}

@@ -6,6 +6,7 @@ import json
 import logging
 
 from language_detection import utils
+from language_detection import allowed_classes
 
 def _parse_arguments():
     """Parse arguments provided from command-line and return them as a dictionary."""
@@ -68,10 +69,10 @@ def start_evaluation(arguments):
     output_file         = arguments['results_output_file']
     implementation_name = arguments['implementation']
 
-    corpus_reader_class = utils.find_corpus_reader(corpus_class_name)
+    corpus_reader_class = allowed_classes.find_corpus_reader(corpus_class_name)
     test_corpus = corpus_reader_class(test_data_file)
     model = utils.load_file(model_file)
-    implementation = utils.find_implementation(implementation_name)
+    implementation = allowed_classes.find_implementation(implementation_name)
 
     logging.info("Retrieving all documents from test data...")
     test_instances = test_corpus.all_tweets() # TODO: rename this method into 'all_instances', 'all_rows' or similarly generic
