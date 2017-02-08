@@ -68,7 +68,7 @@ class CavnarTrenkleImpl(object):
         True
 
         """
-        # freqs = defaultdict(lambda : defaultdict(int))
+        # freqs = defaultdict(lambda : defaultdict(int)) # Not working with Pickle
         freqs = defaultdict(utils.nested_defaultdict)
         for tweet in labeled_tweets:
               lang = tweet['language']

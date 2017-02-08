@@ -33,7 +33,8 @@ def merge_dictionaries_summing(first_dict, second_dict):
 
 def save_file(content, output_file_path):
     """
-    Save content to output file.
+    Save content to output file. The implementation needed for saving the
+    specific file type is evaluated based on the filename extension.
 
     """
     # Detect format from file name
