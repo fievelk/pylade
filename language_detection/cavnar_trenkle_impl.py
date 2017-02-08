@@ -69,7 +69,7 @@ class CavnarTrenkleImpl(object):
 
         """
         # freqs = defaultdict(lambda : defaultdict(int))
-        freqs = defaultdict(utils._nested_defaultdict)
+        freqs = defaultdict(utils.nested_defaultdict)
         for tweet in labeled_tweets:
               lang = tweet['language']
               tweet_ngram_freqs = self._extract_text_ngram_freqs(tweet['text'])

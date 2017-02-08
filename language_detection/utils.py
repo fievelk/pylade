@@ -7,9 +7,9 @@ import logging
 import os
 import pickle
 
-def _nested_defaultdict():
+def nested_defaultdict():
     """
-    Note: this function is defined in order to avoid Pickle errors:
+    This function is defined in order to avoid Pickle errors:
         AttributeError: Can't pickle local object
         'TwitterCorpusReader.ngram_frequencies.<locals>.<lambda>'
     Explanation:
@@ -30,6 +30,37 @@ def merge_dictionaries_summing(first_dict, second_dict):
     for k, v in second_dict.items():
         first_dict[k] += v
     return first_dict
+
+def save_file(content, output_file_path):
+    """
+    Save content to output file.
+
+    """
+    # Detect format from file name
+    _, ext = os.path.splitext(output_file_path)
+    save = _find_IO_function('save', ext)
+    save(content, output_file_path)
+
+def load_file(file_path):
+    # Detect format from file name
+    _, ext = os.path.splitext(file_path)
+    load = _find_IO_function('load', ext)
+    return load(file_path)
+
+def convert_unknown_arguments(dictionary):
+    """Digits are automatically evaluated by json. We need to evaluate booleans."""
+    if not dictionary:
+        return
+    for k,v in dictionary.items():
+        # if v.isdigit():
+        #     dictionary[k] = int(v)
+        if _is_true(v):
+            dictionary[k] = True
+        elif _is_false(v):
+            dictionary[k] = False
+    return dictionary
+
+# Private functions
 
 def _save_result(result, output_file):
     res_list = []
@@ -64,16 +95,6 @@ def _save_generic_file(content, output_file_path):
     with open(output_file_path, 'w') as f:
         f.write(content)
 
-def save_file(content, output_file_path):
-    """
-    Save content to output file.
-
-    """
-    # Detect format from file name
-    _, ext = os.path.splitext(output_file_path)
-    save = _find_IO_function('save', ext)
-    save(content, output_file_path)
-
 def _find_IO_function(operation, extension):
     """
     If the extension is supported, return the related saving function for that specific
@@ -81,7 +102,7 @@ def _find_IO_function(operation, extension):
     Supported `operation` values: 'save', 'load'.
 
     """
-    return SUPPORTED_FORMATS_FUNCTIONS[operation].get(extension, _save_generic_file)
+    return _supported_formats_functions()[operation].get(extension, _save_generic_file)
 
 def _load_json_file(input_file):
     with open(input_file) as in_file:
@@ -90,12 +111,6 @@ def _load_json_file(input_file):
 
 def _load_pickle_file(input_file):
     return pickle.load(open(input_file, "rb"))
-
-def load_file(file_path):
-    # Detect format from file name
-    _, ext = os.path.splitext(file_path)
-    load = _find_IO_function('load', ext)
-    return load(file_path)
 
 def _configure_logger(loglevel):
     """Configure logging levels."""
@@ -115,27 +130,14 @@ def _is_true(value):
 def _is_false(value):
     return value in ['False', 'false']
 
-def convert_unknown_arguments(dictionary):
-    """Digits are automatically evaluated by json. We need to evaluate booleans."""
-    if not dictionary:
-        return
-    for k,v in dictionary.items():
-        # if v.isdigit():
-        #     dictionary[k] = int(v)
-        if _is_true(v):
-            dictionary[k] = True
-        elif _is_false(v):
-            dictionary[k] = False
-    return dictionary
-
-# TODO: Move this constant somewhere else.
-SUPPORTED_FORMATS_FUNCTIONS = {
-    'save': {
-        '.json'  : _save_as_json,
-        '.pickle': _save_as_pickle
-    },
-    'load': {
-        '.json'  : _load_json_file,
-        '.pickle': _load_pickle_file
+def _supported_formats_functions():
+    return {
+        'save': {
+            '.json'  : _save_as_json,
+            '.pickle': _save_as_pickle
+        },
+        'load': {
+            '.json'  : _load_json_file,
+            '.pickle': _load_pickle_file
+        }
     }
-}
