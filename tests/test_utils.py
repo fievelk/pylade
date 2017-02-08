@@ -27,3 +27,19 @@ class TestUtils:
         expected = {"limit": 5000, "verbose": True}
 
         assert utils.convert_unknown_arguments(dictionary) == expected
+
+    # Use pytest tmpdir fixture to create temporary files for tests
+    def test_save_file_json(self, tmpdir):
+        filename_json = 'test_json.json'
+        filepath = '/'.join([str(tmpdir), filename_json])
+        utils.save_file('Test Content', filepath)
+
+        assert filename_json in [path.basename for path in tmpdir.visit('*.json')]
+
+    def test_save_file_pickle(self, tmpdir):
+        filename_pickle = 'test_pickle.pickle'
+        filepath = '/'.join([str(tmpdir), filename_pickle])
+        utils.save_file('Test Content', filepath)
+
+        # assert all(x in (path.basename for path in tmpdir.visit()) for x in [filename_json, filename_pickle])
+        assert filename_pickle in [path.basename for path in tmpdir.visit('*.pickle')]
