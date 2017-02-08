@@ -1,3 +1,5 @@
+import logging
+
 from language_detection.corpus_readers import TwitterCorpusReader
 from language_detection.cavnar_trenkle_impl import CavnarTrenkleImpl
 
