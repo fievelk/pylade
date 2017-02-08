@@ -69,6 +69,7 @@ def start_detection(arguments):
         utils.save_file(results, output_file)
 
     print(results)
+    return results
 
 def main():
     arguments = _parse_arguments()
