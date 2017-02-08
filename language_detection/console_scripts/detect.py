@@ -4,11 +4,12 @@
 import argparse
 import logging
 import json
+import sys
 
 from language_detection import utils
 from language_detection import allowed_classes
 
-def _parse_arguments():
+def _parse_arguments(args):
     """Parse arguments provided from command-line and return them as a dictionary."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -50,7 +51,7 @@ def _parse_arguments():
         type=json.loads
     )
 
-    return vars(parser.parse_args())
+    return vars(parser.parse_args(args))
 
 def start_detection(arguments):
     model_file = arguments['model']
@@ -72,7 +73,7 @@ def start_detection(arguments):
     return results
 
 def main():
-    arguments = _parse_arguments()
+    arguments = _parse_arguments(sys.argv[1:])
     utils._configure_logger(arguments['loglevel'])
     start_detection(arguments)
 
