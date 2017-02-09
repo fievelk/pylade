@@ -140,6 +140,7 @@ class CavnarTrenkleImpl(object):
         results = defaultdict(lambda: defaultdict(float))
 
         if languages and split_languages is True:
+            # Evaluate performance on each language separately.
             for lang in languages: # TODO: Refactor duplicated code below
                 for err_val in error_values:
                     print("Evaluating results for LANG: {}, ERR_VAL: {}".format(lang, err_val))
@@ -148,10 +149,12 @@ class CavnarTrenkleImpl(object):
                     single_result = {lang: {str(err_val): accuracy}}
                     yield single_result
         else:
+            # Evaluate performance on all (specified) languages together.
+            # If no languages have been specified, use all available languages.
             tested_langs = ' '.join(languages) if languages else 'ALL'
             for err_val in error_values:
                 print("Evaluating results for [{}], ERR_VAL: {}".format(tested_langs, err_val, languages))
-                accuracy = self._evaluate_for_languages(test_instances, model, err_val)
+                accuracy = self._evaluate_for_languages(test_instances, model, err_val, languages)
                 results[tested_langs][str(err_val)] = accuracy
                 single_result = {tested_langs: {str(err_val): accuracy}}
                 yield single_result
