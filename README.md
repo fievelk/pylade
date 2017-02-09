@@ -52,4 +52,9 @@ langd \
 
 ## Tests
 
-Use `pytest` from the package root in order to perform tests.
+Give the command `tox` from the package root in order to perform tests.
+
+Tests with `tox` require the following dependencies:
+
+- `tox`
+- `pytest`
