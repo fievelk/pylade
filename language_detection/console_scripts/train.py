@@ -1,62 +1,12 @@
 #/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
-from __future__ import division
-from collections import defaultdict
-import argparse
-import json
 import logging
 import sys
 
 from language_detection import utils
 from language_detection import allowed_classes
-
-def _parse_arguments():
-    """Parse arguments provided from command-line and return them as a dictionary."""
-    description = "Train a language detection model using a training corpus."
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument(
-        '-d', '--debug',
-        help="Activates debug mode",
-        action="store_const", dest="loglevel", const=logging.DEBUG,
-        default=logging.WARNING,
-    )
-    parser.add_argument(
-        '-v', '--verbose',
-        help="Activates verbose mode",
-        action="store_const", dest="loglevel", const=logging.INFO,
-    )
-    parser.add_argument(
-        '-i', '--implementation',
-        help="Chosen method (e.g. CanvarTrenkle)",
-        action="store", dest="implementation",
-        default='CavnarTrenkleImpl'
-    )
-    parser.add_argument(
-        'training-data',
-        help="Path for training data file (e.g. training_tweets.csv)",
-    )
-    parser.add_argument(
-        '-c', '--corpus-reader',
-        help="Corpus Reader class (e.g. TwitterCorpusReader)",
-        action="store", dest="corpus_reader_class",
-        default='TwitterCorpusReader'
-    )
-    parser.add_argument(
-        '-o', '--output',
-        help="Output model",
-        action="store", dest="model_output_file",
-        default='model.json'
-    )
-    # This argument is a json object which will be mapped to dict
-    parser.add_argument(
-        '--train-args',
-        help="Arguments for the training method (JSON format)",
-        action="store", dest="train_args",
-        type=json.loads
-    )
-
-    return vars(parser.parse_args())
+from language_detection.console_scripts import train_script_args_parser
 
 def start_training(arguments):
     training_data_file = arguments['training-data']
@@ -77,7 +27,7 @@ def start_training(arguments):
     utils.save_file(model, output_file)
 
 def main():
-    arguments = _parse_arguments()
+    arguments = train_script_args_parser.parse_arguments(sys.argv[1:])
     utils._configure_logger(arguments['loglevel'])
     start_training(arguments)
 
