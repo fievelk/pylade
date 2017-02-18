@@ -53,31 +53,16 @@ class TwitterCorpusReader(CSVCorpusReader):
 
         return self._available_languages
 
-    def all_tweets(self, limit=0):
-        """
-        Read the corpus and returns a generator for all tweets. Each tweet is a
-        dictionary with the following structure:
-        {
-           'id_str': '484026168300273857',
-           'language': 'en',
-           'text': 'Some text'
-        }
-
-        """
-        return super().all_instances(limit=limit)
-
     def tweets_with_language(self, languages, limit=0):
         """Read the corpus and return a generator for tweets in a specific
         language.
 
         """
-        # for tweet in self.all_tweets(limit=limit):
-        # TODO: Fix. This is not good
         if not limit:
             limit = sys.maxsize
 
         i = 0
-        for tweet in self.all_tweets():
+        for tweet in self.all_instances():
             if tweet['language'] in languages:
                 i += 1
                 yield tweet
@@ -94,7 +79,7 @@ class TwitterCorpusReader(CSVCorpusReader):
 
         """
         languages_tweets_stats = defaultdict(int)
-        for tweet in self.all_tweets():
+        for tweet in self.all_instances():
             lang = tweet['language']
             languages_tweets_stats[lang] += 1
         return languages_tweets_stats

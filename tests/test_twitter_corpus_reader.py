@@ -19,6 +19,36 @@ class TestTwitterCorpusReader:
     def test_available_languages(self, twitter_corpus):
         assert set(twitter_corpus.available_languages) == set(['en', 'it'])
 
+    def test_tweets_with_language(self, twitter_corpus):
+        expected = [
+            {
+                'id_str': '123456789012345671',
+                'language': 'en',
+                'text': 'This is an english example'
+            },
+            {
+                'id_str': '123456789012345672',
+                'language': 'en',
+                'text': '#INCREDIBLE what this can do'
+            }]
+
+        assert list(twitter_corpus.tweets_with_language(['en'], 2)) == expected
+
+        expected = [
+            {
+                'id_str': '123456789012345671',
+                'language': 'en',
+                'text': 'This is an english example'
+            },
+            {
+                'id_str': '123456789012345674',
+                'language': 'it',
+                'text': 'A volte si cambia lingua'
+            }]
+
+        assert list(twitter_corpus.tweets_with_language(['en', 'it'], 2)) == expected
+
+
 class TestCSVCorpusReader:
     def test_all_instances(self, csv_corpus):
         expected = {

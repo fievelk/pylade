@@ -15,7 +15,7 @@ def start_training(arguments):
 
     # languages =  training_corpus.available_languages()
     logging.info("Retrieving all documents from training corpus...")
-    labeled_tweets = training_corpus.all_tweets() # TODO: rename this method into 'all_instances', 'all_rows' or similarly generic
+    labeled_tweets = training_corpus.all_instances()
 
     output_file = arguments['model_output_file']
 

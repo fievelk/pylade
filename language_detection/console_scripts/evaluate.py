@@ -21,7 +21,7 @@ def start_evaluation(arguments):
     implementation = allowed_classes.find_implementation(implementation_name)
 
     logging.info("Retrieving all documents from test data...")
-    test_instances = test_corpus.all_tweets() # TODO: rename this method into 'all_instances', 'all_rows' or similarly generic
+    test_instances = test_corpus.all_instances()
 
     logging.info("Evaluating implementation of {}.".format(implementation.__name__))
     # TODO: Should we only get instances of specified language in advance? Something like:
