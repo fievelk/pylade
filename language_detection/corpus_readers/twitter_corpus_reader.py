@@ -21,7 +21,6 @@ from collections import defaultdict
 
 import csv
 import sys
-import pdb
 
 # AVAILABLE_LANGUAGES = set({
 #     'ar', 'ar_LATN', 'az', 'bg', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'dv',
@@ -36,9 +35,24 @@ import pdb
 class TwitterCorpusReader(object):
     """Corpus Reader for custom twitter corpus."""
 
-    def __init__(self, corpus_path=None):
+    def __init__(self, corpus_path):
         # TODO: Check if corpus path leads to an existing file (create property)
         self.corpus_path = corpus_path
+        self._available_languages = None
+
+    @property
+    def available_languages(self):
+        """
+        Return a list of the available languages in the corpus.
+        'und' is for 'undefined'.
+
+        """
+        # return AVAILABLE_LANGUAGES
+        if not self._available_languages:
+            self._available_languages = list(self.languages_tweets_stats().keys())
+
+        return self._available_languages
+
 
     def all_tweets(self, limit=0):
         """
@@ -87,15 +101,6 @@ class TwitterCorpusReader(object):
 
             if i >= limit:
                 return
-
-    def available_languages(self):
-        """
-        Return a list of the available languages in the corpus.
-        'und' is for 'undefined'.
-
-        """
-        # return AVAILABLE_LANGUAGES
-        return list(self.languages_tweets_stats().keys())
 
     def languages_tweets_stats(self):
         languages_tweets_stats = defaultdict(int)
