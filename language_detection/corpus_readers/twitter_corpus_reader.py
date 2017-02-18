@@ -19,8 +19,9 @@ Original Twitter data:
 
 from collections import defaultdict
 
-import csv
 import sys
+
+from .csv_corpus_reader import CSVCorpusReader
 
 # AVAILABLE_LANGUAGES = set({
 #     'ar', 'ar_LATN', 'az', 'bg', 'bn', 'bs', 'ca', 'cs', 'cy', 'da', 'de', 'dv',
@@ -32,12 +33,11 @@ import sys
 #     'und', 'ur', 'ur_LATN', 'vi', 'wo', 'xh', 'zh-CN', 'zh-TW', 'zu'
 # })
 
-class TwitterCorpusReader(object):
+class TwitterCorpusReader(CSVCorpusReader):
     """Corpus Reader for custom twitter corpus."""
 
-    def __init__(self, corpus_path):
-        # TODO: Check if corpus path leads to an existing file (create property)
-        self.corpus_path = corpus_path
+    def __init__(self, corpus_path, delimiter='|'):
+        super().__init__(corpus_path, delimiter)
         self._available_languages = None
 
     @property
@@ -53,7 +53,6 @@ class TwitterCorpusReader(object):
 
         return self._available_languages
 
-
     def all_tweets(self, limit=0):
         """
         Read the corpus and returns a generator for all tweets. Each tweet is a
@@ -65,23 +64,7 @@ class TwitterCorpusReader(object):
         }
 
         """
-        if not limit:
-            limit = sys.maxsize
-        with open(self.corpus_path, 'r') as input_file:
-            # Find out if the file has a header
-            sniffer = csv.Sniffer()
-            has_header = sniffer.has_header(input_file.readline())
-            input_file.seek(0) # Go back to beginning of file
-
-            # input_data = csv.reader(input_file, delimiter='|')
-            input_data = csv.DictReader(input_file, delimiter='|')
-            # Skip header
-            if has_header:
-                next(input_data)
-            for i, row in enumerate(input_data):
-                if i >= limit:
-                    return
-                yield row
+        return super().all_instances(limit=limit)
 
     def tweets_with_language(self, languages, limit=0):
         """Read the corpus and return a generator for tweets in a specific
@@ -103,6 +86,13 @@ class TwitterCorpusReader(object):
                 return
 
     def languages_tweets_stats(self):
+        """
+        Return a defaultdict containing the number of tweets for each
+        language in the corpus. E.g.:
+
+            defaultdict(int, {'en': 200, 'it': 140})
+
+        """
         languages_tweets_stats = defaultdict(int)
         for tweet in self.all_tweets():
             lang = tweet['language']
