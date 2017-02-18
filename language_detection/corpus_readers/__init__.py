@@ -1,2 +1,3 @@
 from language_detection.corpus_readers.twitter_corpus_reader import TwitterCorpusReader
+from language_detection.corpus_readers.csv_corpus_reader import CSVCorpusReader
 # from .twitter_corpus_reader import TwitterCorpusReader
