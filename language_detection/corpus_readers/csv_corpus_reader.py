@@ -8,6 +8,7 @@ import sys
 
 from .corpus_reader import CorpusReader
 
+
 class CSVCorpusReader(CorpusReader):
     """Corpus Reader for CSV datasets."""
 
