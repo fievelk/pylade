@@ -1,7 +1,7 @@
 import logging
 
 from language_detection.corpus_readers import TwitterCorpusReader
-from language_detection.cavnar_trenkle_impl import CavnarTrenkleImpl
+from language_detection.implementations import CavnarTrenkleImpl
 
 CORPUS_READERS = {TwitterCorpusReader}
 IMPLEMENTATIONS = {CavnarTrenkleImpl}
