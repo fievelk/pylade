@@ -7,12 +7,11 @@ from nltk.tokenize import wordpunct_tokenize
 from nltk.util import ngrams
 
 from language_detection import utils
+from .implementation import Implementation
+
 
 # TODO: Store instance variables (e.g. model)
-class CavnarTrenkleImpl(object):
-    def __init__(self):
-        pass
-
+class CavnarTrenkleImpl(Implementation):
     # TODO: rename this method?
     def train(self, labeled_instances, limit=None, verbose=False):
         """
