@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from language_detection import utils
 
-class TestUtils:
+class TestUtils(object):
     def test_merge_dictionaries_summing(self):
         dict_a = {'a': 5, 'b': 0, 'c': 13}
         defaultdict_a = defaultdict(int)

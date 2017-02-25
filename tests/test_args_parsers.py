@@ -9,7 +9,7 @@ from language_detection.console_scripts.args_parsers import (
     train_script_args_parser
     )
 
-class TestScriptArgumentParsers:
+class TestScriptArgumentParsers(object):
     """Tests for argument parsers used by command-line scripts."""
 
     def test_detect_arguments_parser(self):

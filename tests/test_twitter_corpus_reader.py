@@ -18,7 +18,7 @@ def csv_corpus():
     corpus_path = current_dir + '/test_files/training_set_example.csv'
     return CSVCorpusReader(corpus_path, delimiter='|')
 
-class TestTwitterCorpusReader:
+class TestTwitterCorpusReader(object):
     def test_available_languages(self, twitter_corpus):
         assert set(twitter_corpus.available_languages) == set(['en', 'it'])
 
@@ -52,7 +52,7 @@ class TestTwitterCorpusReader:
         assert list(twitter_corpus.tweets_with_language(['en', 'it'], 2)) == expected
 
 
-class TestCSVCorpusReader:
+class TestCSVCorpusReader(object):
     def test_all_instances(self, csv_corpus):
         expected = {
             'id_str': '123456789012345671',

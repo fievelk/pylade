@@ -5,7 +5,7 @@
 
 from language_detection.console_scripts import detect
 
-class TestDetectScript:
+class TestDetectScript(object):
     """Tests for detect.py script."""
 
     def test_detect_script(self):
