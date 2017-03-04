@@ -108,6 +108,7 @@ class CavnarTrenkleImpl(Implementation):
         return ngram_freqs
 
     # def evaluate(self, model, test_instances, languages=None, error_values=None, split_languages=False, output_file=None):
+    # TODO: model should be an instance variable. Actually, the implementation IS the model
     def evaluate(self, model, test_instances, languages=None, error_values=None, split_languages=False):
         """
         Evaluate model on test data and gather results.
@@ -136,27 +137,29 @@ class CavnarTrenkleImpl(Implementation):
             test_instances = list(test_instances)
 
         print("Evaluating...")
-        results = defaultdict(lambda: defaultdict(float))
 
         if languages and split_languages is True:
-            # Evaluate performance on each language separately.
-            for lang in languages: # TODO: Refactor duplicated code below
-                for err_val in error_values:
-                    print("Evaluating results for LANG: {}, ERR_VAL: {}".format(lang, err_val))
-                    accuracy = self._evaluate_for_languages(test_instances, model, err_val, [lang])
-                    results[lang][str(err_val)] = accuracy
-                    single_result = {lang: {str(err_val): accuracy}}
-                    yield single_result
+            # Evaluate performance on each language separately
+            for lang in languages:
+                yield from self._eval_single_result(
+                    error_values, test_instances, model, [lang])
         else:
-            # Evaluate performance on all (specified) languages together.
-            # If no languages have been specified, use all available languages.
-            tested_langs = ' '.join(languages) if languages else 'ALL'
-            for err_val in error_values:
-                print("Evaluating results for [{}], ERR_VAL: {}".format(tested_langs, err_val, languages))
-                accuracy = self._evaluate_for_languages(test_instances, model, err_val, languages)
-                results[tested_langs][str(err_val)] = accuracy
-                single_result = {tested_langs: {str(err_val): accuracy}}
-                yield single_result
+            # Evaluate performance on all (specified) languages together
+            yield from self._eval_single_result(
+                error_values, test_instances, model, languages)
+
+    def _eval_single_result(self, error_values, test_instances, model, languages=None):
+        """
+        Evaluate performance on specified languages. If no languages have been
+        specified, use all available languages.
+
+        """
+        tested_langs = ' '.join(languages) if languages else 'ALL'
+        for err_val in error_values:
+            print("Evaluating results for LANG: {}, ERR_VAL: {}".format(tested_langs, err_val))
+            accuracy = self._evaluate_for_languages(test_instances, model, err_val, languages)
+            single_result = {tested_langs: {str(err_val): accuracy}}
+            yield single_result
 
     def _evaluate_for_languages(self, test_instances, model, error_value, languages=None):
         correct = 0
