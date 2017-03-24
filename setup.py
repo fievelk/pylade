@@ -15,4 +15,7 @@ setup(name='language_detection',
             'langd=language_detection.console_scripts.detect:main',
             ],
         },
+      install_requires=[
+          'nltk',
+      ],
       zip_safe=False)
