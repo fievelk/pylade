@@ -26,7 +26,7 @@ def parse_arguments(args):
     )
     parser.add_argument(
         '-i', '--implementation',
-        help="Chosen method (e.g. CanvarTrenkle)",
+        help="Chosen method (e.g. CavnarTrenkle)",
         action="store", dest="implementation",
         default='CavnarTrenkleImpl'
     )
