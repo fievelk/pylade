@@ -4,6 +4,7 @@
 import argparse
 import logging
 import json
+import os
 
 def parse_arguments(args):
     """Parse arguments provided from command-line and return them as a dictionary."""
@@ -21,8 +22,10 @@ def parse_arguments(args):
         action="store_const", dest="loglevel", const=logging.INFO,
     )
     parser.add_argument(
-        'model',
+        '-m', '--model',
         help="Path to model input file (e.g. model.json)",
+        action="store", dest="model",
+        default='/'.join([os.path.dirname(__file__), '../../data/model.json'])
     )
     parser.add_argument(
         '-i', '--implementation',

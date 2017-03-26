@@ -15,10 +15,14 @@ class TestScriptArgumentParsers(object):
     def test_detect_arguments_parser(self):
         """Test argument parser for detect.py script."""
 
-        args = ['output/model.pickle', 'This is an english text']
+        args = [
+            'This is an english text',
+            '-m', 'language_detection/data/model.json'
+            ]
+
         expected = {
             'output_file': None,
-            'model': 'output/model.pickle',
+            'model': 'language_detection/data/model.json',
             'predict_args': None,
             'text': 'This is an english text',
             'implementation': 'CavnarTrenkleImpl',
@@ -31,15 +35,15 @@ class TestScriptArgumentParsers(object):
         """Test argument parser for evaluate.py script."""
 
         args = [
-            'path/to/output/model.pickle',
             '/path/to/test_set.csv',
+            '-m', 'path/to/language_detection/data/model.json',
             '--corpus-reader', 'SomeCorpusReader',
             '--output', 'my_results.json',
             '--eval-args', '{"languages": ["it", "de"], "error_values": 8000}'
             ]
 
         expected = {
-            'model': 'path/to/output/model.pickle',
+            'model': 'path/to/language_detection/data/model.json',
             'test-data': '/path/to/test_set.csv',
             'corpus_reader_class': 'SomeCorpusReader',
             'results_output_file': 'my_results.json',
@@ -61,7 +65,7 @@ class TestScriptArgumentParsers(object):
             '/path/to/training_set.csv',
             '--implementation', 'SomeCustomImplementation',
             '--corpus-reader', 'SomeCorpusReader',
-            '--output', 'path/to/output/model.pickle',
+            '--output', 'path/to/language_detection/data/model.json',
             '--train-args', '{"limit": 5000, "verbose": "True"}'
             ]
 
@@ -69,7 +73,7 @@ class TestScriptArgumentParsers(object):
             'training-data': '/path/to/training_set.csv',
             'implementation': 'SomeCustomImplementation',
             'corpus_reader_class': 'SomeCorpusReader',
-            'model_output_file': 'path/to/output/model.pickle',
+            'model_output_file': 'path/to/language_detection/data/model.json',
             'train_args': {'limit': 5000, 'verbose': 'True'},
             'loglevel': 30
         }

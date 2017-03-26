@@ -13,7 +13,7 @@ class TestDetectScript(object):
 
         args = {
             'output_file': None,
-            'model': 'output/model.pickle',
+            'model': 'language_detection/data/model.json',
             'predict_args': None,
             'text': 'This is an english text',
             'implementation': 'CavnarTrenkleImpl',
