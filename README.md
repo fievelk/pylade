@@ -1,12 +1,12 @@
-# Pylade
+# PyLaDe
 
-`pylade` is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with a more complex scaffolding for customized tasks.
+`pylade` (pronounced *`[ˈpiːlɑːde]`*) is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with a more complex scaffolding for customized tasks.
 
 The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based approach*. However, the tool can be further expanded with customized language identification implementations.
 
 ## Requirements
 
-- python 3.4, 3.5
+- `python >= 3.4`
 - `nltk`
 
 ## Installation
@@ -14,8 +14,8 @@ The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based appr
 Download the repository and install using pip (locally):
 
 ```bash
-$ git clone git@github.com:fievelk/language-detection.git
-$ cd language-detection
+$ git clone git@github.com:fievelk/PyLaDe.git
+$ cd pylade
 $ pip install .
 ```
 
@@ -77,12 +77,12 @@ Tests with `tox` require the following dependencies:
 - `tox`
 - `pytest`
 
-### Customization
+## Customization
 
-Different language deteection approaches can be implemented creating new classes that inherit from the `Implementation` class. This class should be considered as an interface whose methods are meant to be implemented by the inheriting class.
+Different language detection approaches can be implemented creating new classes that inherit from the `Implementation` class. This class should be considered as an interface whose methods are meant to be implemented by the inheriting class.
 
 Customized corpus readers can be created the same way, inheriting from the `CorpusReader` interface instead.
 
-### References
+## References
 
 - Cavnar, William B., and John M. Trenkle. "N-gram-based text categorization." *Ann Arbor MI* 48113.2 (1994): 161-175.

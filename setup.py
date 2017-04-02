@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(name='pylade',
       version='0.1',
-      description='PyLaDe - Language Detection',
+      description='PyLaDe - Language Detection tool written in Python.',
       url='https://github.com/fievelk/pylade',
       author='Pierpaolo Pantone',
       author_email='24alsecondo@gmail.com',
