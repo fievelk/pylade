@@ -8,6 +8,7 @@ setup(name='pylade',
       author_email='24alsecondo@gmail.com',
       license='MIT',
       packages=find_packages(),
+      package_data={'pylade': ['data/*.json']},
       entry_points = {
         'console_scripts': [
             'pylade=pylade.console_scripts.detect:main',
