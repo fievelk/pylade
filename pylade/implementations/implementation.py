@@ -5,6 +5,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class Implementation(ABC):
     """
     Implementation interface. Forces a common structure among implementations

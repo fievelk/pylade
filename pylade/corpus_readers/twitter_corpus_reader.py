@@ -5,12 +5,13 @@
 Corpus reader for twitter dataset.
 The corpus has been obtained using the original twitter dataset with language
 labels (see URL below). Tweet ids have been subsequently hydrated using Twitter
-APIs and NLTK. The result is a new dataset (CSV format) with the following structure:
+APIs and NLTK. The result is a new dataset (CSV format) with the following
+structure:
 
     language|id_str|text
 
-where `language` is the label, `id_str` is the tweet ID, and `text` is the content
-of the tweet.
+where `language` is the label, `id_str` is the tweet ID, and `text` is the
+content of the tweet.
 
 Original Twitter data:
 - https://blog.twitter.com/2015/evaluating-language-identification-performance

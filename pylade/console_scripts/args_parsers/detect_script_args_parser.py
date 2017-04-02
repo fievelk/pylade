@@ -1,13 +1,19 @@
-# #/usr/bin/env python
-# #! -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Parsing functionalities for for detect.py script arguments."""
 
 import argparse
-import logging
 import json
+import logging
 import os
 
+
 def parse_arguments(args):
-    """Parse arguments provided from command-line and return them as a dictionary."""
+    """
+    Parse arguments provided from command-line and return them as a dictionary.
+
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-d', '--debug',

@@ -1,3 +1,5 @@
+"""Cavnar Trenkle implementation module."""
+
 from __future__ import division # Safety measure in case we extend to py2.7
 
 from collections import defaultdict
@@ -12,7 +14,7 @@ from .implementation import Implementation
 
 # TODO: Store instance variables (e.g. model)
 class CavnarTrenkleImpl(Implementation):
-    # TODO: rename this method?
+    """Cavnar Trenkle implementation class."""
     def train(self, labeled_instances, limit=None, verbose=False):
         """
         A profile is a list of ngrams sorted in reverse order (from the most
@@ -32,19 +34,25 @@ class CavnarTrenkleImpl(Implementation):
         languages_ngram_freqs = self._languages_ngram_frequencies(labeled_instances)
         print("Sorting language profiles in lists")
         for language in languages_ngram_freqs:
-            language_profiles[language] = self._compute_profile_from_frequencies(languages_ngram_freqs[language], limit)
+            language_profiles[language] = self._compute_profile_from_frequencies(
+                languages_ngram_freqs[language], limit)
         return language_profiles
 
     def _compute_profile_from_frequencies(self, frequencies_dict, limit):
-        # Sort by value first, and then also by key (alphabetic order) if values are equal
-        return [ngram[0] for ngram in sorted(frequencies_dict.items(), key= lambda x: (x[1], x[0]), reverse=True)[:limit]]
+        # Sort by value first, and then also by key (alphabetic order) if values
+        # are equal.
+        return [ngram[0] for ngram in sorted(
+            frequencies_dict.items(),
+            key=lambda x: (x[1], x[0]),
+            reverse=True)[:limit]]
 
     def _compute_text_profile(self, text, limit=None):
         """
         >>> implementation = CavnarTrenkleImpl()
         >>> text = 'Hello'
-        >>> implementation._compute_text_profile(text)
-        ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', 'ello', 'ell', 'el', 'e']
+        >>> implementation._compute_text_profile(text) # doctest: +NORMALIZE_WHITESPACE
+        ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h',
+        'ello', 'ell', 'el', 'e']
         >>> implementation._compute_text_profile(text, limit=2)
         ['l', 'o']
 
@@ -57,30 +65,33 @@ class CavnarTrenkleImpl(Implementation):
         Compute ngram frequencies for each language in the corpus.
 
         >>> implementation = CavnarTrenkleImpl()
-        >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
+        >>> tweets = [{'language': 'it', 'id_str': '12', 'text': 'Ciao'}, \
+                      {'language': 'en', 'id_str': '15', 'text': 'Hello'}]
         >>> lang_ngram_freqs = implementation._languages_ngram_frequencies(tweets)
         >>> lang_ngram_freqs == {\
-            'it': {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, \
-                'ia': 1, 'ao': 1, 'cia': 1, 'iao': 1, 'ciao': 1}, \
-            'en': {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, 'lo': 1, \
-                'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, 'hello': 1}}
+            'it': {'c':1, 'i': 1, 'a': 1, 'o': 1, 'ci': 1, 'ia': 1, 'ao': 1, \
+                   'cia': 1, 'iao': 1, 'ciao': 1}, \
+            'en': {'h':1, 'e': 1, 'l': 2, 'o': 1, 'he': 1, 'el': 1, 'll': 1, \
+                   'lo': 1, 'hel': 1, 'ell': 1, 'llo': 1, 'hell': 1, 'ello': 1, \
+                   'hello': 1}}
         True
 
         """
         # freqs = defaultdict(lambda : defaultdict(int)) # Not working with Pickle
         freqs = defaultdict(utils.nested_defaultdict)
         for tweet in labeled_tweets:
-              lang = tweet['language']
-              tweet_ngram_freqs = self._extract_text_ngram_freqs(tweet['text'])
-              utils.merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
+            lang = tweet['language']
+            tweet_ngram_freqs = self._extract_text_ngram_freqs(tweet['text'])
+            utils.merge_dictionaries_summing(freqs[lang], tweet_ngram_freqs)
 
         return freqs
 
     def _extract_text_ngram_freqs(self, text):
         """
-        Tokenize the text. For each token in the text, extract ngrams of different
-        length (from 1 to 5). Compute how many times each of these ngrams occur
-        in the text. Then return a dictionary of { ngram: frequencies }.
+        Tokenize the text. For each token in the text, extract ngrams of
+        different length (from 1 to 5). Compute how many times each of these
+        ngrams occur in the text. Then return a dictionary of
+        { ngram: frequencies }.
 
         >>> implementation = CavnarTrenkleImpl()
         >>> ngrams = implementation._extract_text_ngram_freqs("HeLLo")
@@ -94,12 +105,12 @@ class CavnarTrenkleImpl(Implementation):
 
         """
         tokens = wordpunct_tokenize(text.lower()) # Force lower case
-        #TODO: Delete numbers and punctuation
-        #TODO: Should we use nltk twitter tokenizer?
+        # TODO: Delete numbers and punctuation
+        # TODO: Should we use nltk twitter tokenizer?
 
         ngram_freqs = defaultdict(int)
         for token in tokens:
-            for n in range(1,6): # Use 1-grams to 5-grams
+            for n in range(1, 6): # Use 1-grams to 5-grams
                 for ngram in ngrams(token, n):
                     ngram_string = ''.join(ngram)
                     ngram_freqs[ngram_string] += 1
@@ -107,9 +118,10 @@ class CavnarTrenkleImpl(Implementation):
 
         return ngram_freqs
 
-    # def evaluate(self, model, test_instances, languages=None, error_values=None, split_languages=False, output_file=None):
-    # TODO: model should be an instance variable. Actually, the implementation IS the model
-    def evaluate(self, model, test_instances, languages=None, error_values=None, split_languages=False):
+    # TODO: model should be an instance variable. Actually, the implementation
+    # IS the model
+    def evaluate(self, model, test_instances, languages=None, error_values=None,
+                 split_languages=False):
         """
         Evaluate model on test data and gather results.
         `model` is a list of training profiles for languages (see paper).
@@ -156,8 +168,11 @@ class CavnarTrenkleImpl(Implementation):
         """
         tested_langs = ' '.join(languages) if languages else 'ALL'
         for err_val in error_values:
-            print("Evaluating results for LANG: {}, ERR_VAL: {}".format(tested_langs, err_val))
-            accuracy = self._evaluate_for_languages(test_instances, model, err_val, languages)
+            print("Evaluating results for LANG: {}, ERR_VAL: {}".format(
+                tested_langs,
+                err_val))
+            accuracy = self._evaluate_for_languages(
+                test_instances, model, err_val, languages)
             single_result = {tested_langs: {str(err_val): accuracy}}
             yield single_result
 
@@ -171,36 +186,46 @@ class CavnarTrenkleImpl(Implementation):
             # with specific labels (a subset of test_instances). To be fixed.
             if languages and labeled_tweet['language'] not in languages:
                 continue
-            predicted_language = self.predict_language(labeled_tweet['text'], model, error_value=error_value)
+            predicted_language = self.predict_language(
+                labeled_tweet['text'], model, error_value=error_value)
             if predicted_language == labeled_tweet['language']:
                 correct += 1
             else:
                 incorrect += 1
             total += 1
 
-            print("Label: {}, Guess: {}, Correct: {}, Incorrect: {}, Total: {}   ".format(labeled_tweet['language'], predicted_language, correct, incorrect, total), end='\r', flush=True)
+            print(
+                "Label: {}, Guess: {}, Correct: {}, Incorrect: {}, Total: {}   ".format(
+                    labeled_tweet['language'],
+                    predicted_language,
+                    correct,
+                    incorrect,
+                    total),
+                end='\r', flush=True)
         print()
         accuracy = correct / total
         # single_result = {languages: {str(err_val): accuracy}}
-        return accuracy # TODO: this should be a dictionary: {'accuracy': accuracy}
+        # TODO: this should be a dictionary: {'accuracy': accuracy}
+        return accuracy
 
     def predict_language(self, text, training_profiles, error_value=8000):
         """
         >>> implementation = CavnarTrenkleImpl()
         >>> text = 'hello'
         >>> training_profiles = {\
-            'en': ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', 'h', \
-                'ello', 'ell', 'el', 'e'],\
+            'en': ['l', 'o', 'lo', 'llo', 'll', 'hello', 'hell', 'hel', 'he', \
+                   'h', 'ello', 'ell', 'el', 'e'], \
             'it': ['o', 'iao', 'ia', 'i', 'ciao', 'cia', 'ci', 'c', 'ao', 'a']}
         >>> implementation.predict_language(text, training_profiles)
         'en'
 
-        NOTE: This method could be improved by simply iterating over distances and
-        discarding them when they are smaller than the previous one. This would
-        not allow us to reuse `predict_language_scores` here.
+        NOTE: This method could be improved by simply iterating over distances
+        and discarding them when they are smaller than the previous one. This
+        would not allow us to reuse `predict_language_scores` here.
 
         NOTE: This is the same as:
-            lang_distances = self.predict_language_scores(text, training_profiles, error_value)
+            lang_distances = self.predict_language_scores(
+                text, training_profiles, error_value)
             min(lang_distances, key=lang_distances.get)
 
         """
@@ -209,7 +234,8 @@ class CavnarTrenkleImpl(Implementation):
         text_profile = self._compute_text_profile(text)
 
         for language in training_profiles:
-            distance = self._distance(text_profile, training_profiles[language], error_value=error_value)
+            distance = self._distance(
+                text_profile, training_profiles[language], error_value=error_value)
             if distance < min_distance:
                 min_distance = distance
                 predicted_language = language
@@ -218,15 +244,16 @@ class CavnarTrenkleImpl(Implementation):
 
     def _distance(self, text_profile, training_profile, error_value=1000):
         """
-        This method compares two profiles and returns a number which represents the
-        distance between them. A high distance means that the language of the texts
-        that have been used to generate the profiles is not the same. This distance
-        is called "out-of-place" metric in the paper.
-        We usually compare a language profile (generated from a training set) to the
-        profile generated from a single text (e.g. a tweet or a facebook post).
-        Note: If a ngram is not present in the training profile, we penalize the
-        text profile using an arbitrary `error_value`. This value should be decided
-        based on tuning on the test set.
+        This method compares two profiles and returns a number which represents
+        the distance between them. A high distance means that the language of
+        the texts that have been used to generate the profiles is not the same.
+        This distance is called "out-of-place" metric in the paper.
+        We usually compare a language profile (generated from a training set)
+        to the profile generated from a single text (e.g. a tweet or a facebook
+        post).
+        Note: If a ngram is not present in the training profile, we penalize
+        the text profile using an arbitrary `error_value`. This value should
+        be decided based on tuning on the test set.
 
         >>> text_profile = ['h', 'e', 'l', 'o', 'he']
         >>> training_profile = ['h', 'e', 'l', 'o', 'he']

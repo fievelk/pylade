@@ -5,6 +5,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class CorpusReader(ABC):
     """Corpus reader interface. Forces a common structure among corpus readers."""
 

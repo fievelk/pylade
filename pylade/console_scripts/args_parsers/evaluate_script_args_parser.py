@@ -1,13 +1,19 @@
-# #/usr/bin/env python
-# #! -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Parsing functionalities for for evaluate.py script arguments."""
 
 import argparse
-import logging
 import json
+import logging
 import os
 
+
 def parse_arguments(args):
-    """Parse arguments provided from command-line and return them as a dictionary."""
+    """
+    Parse arguments provided from command-line and return them as a dictionary.
+
+    """
     description = "Evaluate a language detection model using a test corpus."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(

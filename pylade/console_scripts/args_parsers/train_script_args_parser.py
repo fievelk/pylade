@@ -1,12 +1,18 @@
-#/usr/bin/env python
-#! -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Parsing functionalities for for train.py script arguments."""
 
 import argparse
 import json
 import logging
 
+
 def parse_arguments(args):
-    """Parse arguments provided from command-line and return them as a dictionary."""
+    """
+    Parse arguments provided from command-line and return them as a dictionary.
+
+    """
     description = "Train a language detection model using a training corpus."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
