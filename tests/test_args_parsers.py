@@ -3,7 +3,7 @@
 
 """Tests for command-line scripts argument parsers."""
 
-from language_detection.console_scripts.args_parsers import (
+from pylade.console_scripts.args_parsers import (
     detect_script_args_parser,
     evaluate_script_args_parser,
     train_script_args_parser
@@ -17,12 +17,12 @@ class TestScriptArgumentParsers(object):
 
         args = [
             'This is an english text',
-            '-m', 'language_detection/data/model.json'
+            '-m', 'pylade/data/model.json'
             ]
 
         expected = {
             'output_file': None,
-            'model': 'language_detection/data/model.json',
+            'model': 'pylade/data/model.json',
             'predict_args': None,
             'text': 'This is an english text',
             'implementation': 'CavnarTrenkleImpl',
@@ -36,14 +36,14 @@ class TestScriptArgumentParsers(object):
 
         args = [
             '/path/to/test_set.csv',
-            '-m', 'path/to/language_detection/data/model.json',
+            '-m', 'path/to/pylade/data/model.json',
             '--corpus-reader', 'SomeCorpusReader',
             '--output', 'my_results.json',
             '--eval-args', '{"languages": ["it", "de"], "error_values": 8000}'
             ]
 
         expected = {
-            'model': 'path/to/language_detection/data/model.json',
+            'model': 'path/to/pylade/data/model.json',
             'test-data': '/path/to/test_set.csv',
             'corpus_reader_class': 'SomeCorpusReader',
             'results_output_file': 'my_results.json',
@@ -65,7 +65,7 @@ class TestScriptArgumentParsers(object):
             '/path/to/training_set.csv',
             '--implementation', 'SomeCustomImplementation',
             '--corpus-reader', 'SomeCorpusReader',
-            '--output', 'path/to/language_detection/data/model.json',
+            '--output', 'path/to/pylade/data/model.json',
             '--train-args', '{"limit": 5000, "verbose": "True"}'
             ]
 
@@ -73,7 +73,7 @@ class TestScriptArgumentParsers(object):
             'training-data': '/path/to/training_set.csv',
             'implementation': 'SomeCustomImplementation',
             'corpus_reader_class': 'SomeCorpusReader',
-            'model_output_file': 'path/to/language_detection/data/model.json',
+            'model_output_file': 'path/to/pylade/data/model.json',
             'train_args': {'limit': 5000, 'verbose': 'True'},
             'loglevel': 30
         }

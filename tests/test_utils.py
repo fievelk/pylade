@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 
-from language_detection import utils
+from pylade import utils
 
 class TestUtils(object):
     def test_merge_dictionaries_summing(self):

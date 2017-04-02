@@ -1,13 +1,17 @@
-# Language Detection
+# Pylade
+
+`pylade` is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with a more complex scaffolding for customized tasks.
+
+The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based approach*. However, the tool can be further expanded with customized language identification implementations.
 
 ## Requirements
 
-- python 3.5
+- python 3.4, 3.5
 - `nltk`
 
 ## Installation
 
-Download repository and install using pip (locally):
+Download the repository and install using pip (locally):
 
 ```bash
 $ git clone git@github.com:fievelk/language-detection.git
@@ -20,7 +24,7 @@ $ pip install .
 For a quick use, simply give the following command from terminal:
 
 ```bash
-langd "Put text here"
+pylade "Put text here"
 # en
 ```
 Done!
@@ -30,7 +34,7 @@ If you want to get deeper and use some more advanced features, please keep readi
 ### Train a model on a training set
 
 ```bash
-langd_train \
+pylade_train \
     training_set.csv \
     --implementation CavnarTrenkleImpl \
     --corpus-reader TwitterCorpusReader \
@@ -41,7 +45,7 @@ langd_train \
 ### Evaluate a model on a test set
 
 ```bash
-langd_eval \
+pylade_eval \
     test_set.csv \
     -m model.json \
     --corpus-reader TwitterCorpusReader \
@@ -52,7 +56,7 @@ langd_eval \
 ### Detect language of a text using a trained model
 
 ```bash
-langd \
+pylade \
     "Put text here" \
     -m model.json \
     --implementation CavnarTrenkleImpl \
@@ -72,3 +76,13 @@ Tests with `tox` require the following dependencies:
 
 - `tox`
 - `pytest`
+
+### Customization
+
+Different language deteection approaches can be implemented creating new classes that inherit from the `Implementation` class. This class should be considered as an interface whose methods are meant to be implemented by the inheriting class.
+
+Customized corpus readers can be created the same way, inheriting from the `CorpusReader` interface instead.
+
+### References
+
+- Cavnar, William B., and John M. Trenkle. "N-gram-based text categorization." *Ann Arbor MI* 48113.2 (1994): 161-175.

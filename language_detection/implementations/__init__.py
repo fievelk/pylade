@@ -1,1 +1,0 @@
-from language_detection.implementations.cavnar_trenkle_impl import CavnarTrenkleImpl

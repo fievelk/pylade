@@ -6,7 +6,7 @@ import sys
 from nltk.tokenize import wordpunct_tokenize
 from nltk.util import ngrams
 
-from language_detection import utils
+from pylade import utils
 from .implementation import Implementation
 
 

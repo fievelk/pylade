@@ -4,7 +4,7 @@
 import os
 import pytest
 
-from language_detection.corpus_readers import TwitterCorpusReader, CSVCorpusReader
+from pylade.corpus_readers import TwitterCorpusReader, CSVCorpusReader
 
 @pytest.fixture()
 def twitter_corpus():

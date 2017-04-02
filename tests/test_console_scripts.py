@@ -3,7 +3,7 @@
 
 """Tests for command-line scripts."""
 
-from language_detection.console_scripts import detect
+from pylade.console_scripts import detect
 
 class TestDetectScript(object):
     """Tests for detect.py script."""
@@ -13,7 +13,7 @@ class TestDetectScript(object):
 
         args = {
             'output_file': None,
-            'model': 'language_detection/data/model.json',
+            'model': 'pylade/data/model.json',
             'predict_args': None,
             'text': 'This is an english text',
             'implementation': 'CavnarTrenkleImpl',

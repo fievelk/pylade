@@ -1,7 +1,7 @@
 import logging
 
-from language_detection.corpus_readers import TwitterCorpusReader
-from language_detection.implementations import CavnarTrenkleImpl
+from pylade.corpus_readers import TwitterCorpusReader
+from pylade.implementations import CavnarTrenkleImpl
 
 CORPUS_READERS = {TwitterCorpusReader}
 IMPLEMENTATIONS = {CavnarTrenkleImpl}

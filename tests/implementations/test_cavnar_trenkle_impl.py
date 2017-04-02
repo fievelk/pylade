@@ -3,7 +3,7 @@
 
 """Tests for CavnarTrenkleImpl."""
 
-from language_detection.implementations import CavnarTrenkleImpl
+from pylade.implementations import CavnarTrenkleImpl
 
 
 class TestCavnarTrenkleImpl(object):

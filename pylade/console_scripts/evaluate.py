@@ -4,9 +4,9 @@
 import logging
 import sys
 
-from language_detection import utils
-from language_detection import allowed_classes
-from language_detection.console_scripts import evaluate_script_args_parser
+from pylade import utils
+from pylade import allowed_classes
+from pylade.console_scripts import evaluate_script_args_parser
 
 def start_evaluation(arguments):
     model_file          = arguments['model']
