@@ -49,7 +49,7 @@ pylade_train \
 ```bash
 pylade_eval \
     test_set.csv \
-    -m model.json \
+    --model model.json \
     --corpus-reader TwitterCorpusReader \
     --output results.json \
     --eval-args '{"languages": ["it", "de"], "error_values": 8000}'
@@ -60,7 +60,7 @@ pylade_eval \
 ```bash
 pylade \
     "Put text here" \
-    -m model.json \
+    --model model.json \
     --implementation CavnarTrenkleImpl \
     --output detected_language.txt \
     --predict-args '{"error_value": 8000}'
