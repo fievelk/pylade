@@ -44,16 +44,21 @@ pylade_train \
     --train-args '{"limit": 5000, "verbose": "True"}'
 ```
 
+`--train-args` is a dictionary of arguments to be passed to the `train()` method of the chosen implementation (`CavnarTrenkleImpl` in the example above). For an accurate description of the arguments please refer to the `train()` method docstring.
+
 ### Evaluate a model on a test set
 
 ```bash
 pylade_eval \
     test_set.csv \
     --model model.json \
+    --implementation CavnarTrenkleImpl \
     --corpus-reader TwitterCorpusReader \
     --output results.json \
     --eval-args '{"languages": ["it", "de"], "error_values": 8000}'
 ```
+
+`--eval-args` is a dictionary of arguments to be passed to the `evaluate()` method of the chosen implementation (`CavnarTrenkleImpl` in the example above). For an accurate description of the arguments please refer to the `evaluate()` method docstring.
 
 ### Detect language of a text using a trained model
 
@@ -65,6 +70,8 @@ pylade \
     --output detected_language.txt \
     --predict-args '{"error_value": 8000}'
 ```
+
+`--predict-args` is a dictionary of arguments to be passed to the `predict_language()` method of the chosen implementation (`CavnarTrenkleImpl` in the example above). For an accurate description of the arguments please refer to the `predict_language()` method docstring.
 
 ## Info
 
