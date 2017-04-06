@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Corpus reader for CSV datasets."""
+"""Module for corpus readers for CSV datasets."""
 
 import csv
 import sys
@@ -10,7 +10,13 @@ from .corpus_reader import CorpusReader
 
 
 class CSVCorpusReader(CorpusReader):
-    """Corpus Reader for CSV datasets."""
+    """Corpus Reader for CSV datasets.
+
+    Attributes:
+        corpus_path (str): A path leading to a CSV corpus file.
+        delimiter (str): The character that separates the CSV corpus columns.
+
+    """
 
     def __init__(self, corpus_path, delimiter='|'):
         # TODO: Check if corpus path leads to an existing file (create property)
@@ -21,6 +27,12 @@ class CSVCorpusReader(CorpusReader):
         """
         Read the corpus and returns a generator for all instances. Each instance
         is a dictionary.
+
+        Args:
+            limit (int): The maximum number of instances to return.
+
+        Yields:
+            A generator of corpus instances.
 
         """
         if not limit:
