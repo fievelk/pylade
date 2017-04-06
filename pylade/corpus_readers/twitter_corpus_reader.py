@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Corpus reader for twitter dataset.
-The corpus has been obtained using the original twitter dataset with language
-labels (see URL below). Tweet ids have been subsequently hydrated using Twitter
+Corpus reader for twitter datasets.
+
+The corpus has been obtained using the original Twitter dataset with language
+labels (see URL below). Tweet IDs have been subsequently hydrated using Twitter
 APIs and NLTK. The result is a new dataset (CSV format) with the following
 structure:
 
@@ -14,6 +15,7 @@ where `language` is the label, `id_str` is the tweet ID, and `text` is the
 content of the tweet.
 
 Original Twitter data:
+
 - https://blog.twitter.com/2015/evaluating-language-identification-performance
 
 """
@@ -35,7 +37,13 @@ from .csv_corpus_reader import CSVCorpusReader
 # })
 
 class TwitterCorpusReader(CSVCorpusReader):
-    """Corpus Reader for custom twitter corpus."""
+    """Corpus Reader for custom Twitter corpus.
+
+    Attributes:
+        corpus_path (str): A path leading to a CSV corpus file.
+        delimiter (str): The character that separates the CSV corpus columns.
+
+    """
 
     def __init__(self, corpus_path, delimiter='|'):
         super().__init__(corpus_path, delimiter)
@@ -43,9 +51,9 @@ class TwitterCorpusReader(CSVCorpusReader):
 
     @property
     def available_languages(self):
-        """
-        Return a list of the available languages in the corpus.
-        'und' is for 'undefined'.
+        """A list of the available languages in the corpus.
+
+        `und` is for 'undefined'.
 
         """
         # return AVAILABLE_LANGUAGES
@@ -55,8 +63,14 @@ class TwitterCorpusReader(CSVCorpusReader):
         return self._available_languages
 
     def tweets_with_language(self, languages, limit=0):
-        """Read the corpus and return a generator for tweets in a specific
-        language.
+        """Retrieve tweets with specific languages from the corpus.
+
+        Args:
+            languages (list): A list of language labels used to filter tweets.
+            limit (int): The maximum number of tweets to return.
+
+        Yields:
+            A generator of tweets with specific language labels.
 
         """
         if not limit:

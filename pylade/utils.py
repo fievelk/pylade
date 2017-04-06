@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Utility functions shared across the project."""
+
 from collections import defaultdict
 import json
 import logging
@@ -9,11 +11,17 @@ import pickle
 
 
 def nested_defaultdict():
-    """
-    This function is defined in order to avoid Pickle errors:
-        AttributeError: Can't pickle local object
-        'TwitterCorpusReader.ngram_frequencies.<locals>.<lambda>'
-    Explanation:
+    """Allow to avoid Pickle errors with lambdas.
+
+    This function is defined in order to avoid Pickle errors. E.g.:
+
+    >>> AttributeError: Can't pickle local object # doctest: +SKIP
+    ... 'TwitterCorpusReader.ngram_frequencies.<locals>.<lambda>'
+
+    Returns:
+        a `defaultdict` of integers.
+
+    NOTE:
         Functions are pickled by name, not by code. Unpickling will only
         work if a function with the same name is present in in the same
         module. This is why pickling a lambda won't work: they have no
@@ -23,10 +31,19 @@ def nested_defaultdict():
     return defaultdict(int)
 
 def merge_dictionaries_summing(first_dict, second_dict):
-    """
-    Merge two dictionaries summing values with the same key. Returns the
-    enriched version of the first dictionary (so it works in place).
-    Note: this works only with defaultdict.
+    """Merge two dictionaries summing values with the same key.
+
+    Args:
+        first_dict (defaultdict): A defaultdict dictionary.
+        second_dict (defaultdict): A defaultdict dictionary.
+
+    Returns:
+        The enriched version of the first dictionary (it works in place). The
+        returned object is of type `defaultdict`.
+
+    Note:
+        This only works only with two input objects for the moment. Later
+        improvements could be made, if needed.
 
     """
     for k, v in second_dict.items():
@@ -34,9 +51,15 @@ def merge_dictionaries_summing(first_dict, second_dict):
     return first_dict
 
 def save_file(content, output_file_path):
-    """
-    Save content to output file. The implementation needed for saving the
-    specific file type is evaluated based on the filename extension.
+    """Save content to output file.
+
+    The implementation needed to save the specific file type is evaluated
+    based on the filename extension.
+
+    Args:
+        content: The content that has to be stored
+        output_file_path (str): The path to the output file where the content
+            will be stored.
 
     """
     # Detect format from file name
@@ -45,15 +68,35 @@ def save_file(content, output_file_path):
     save(content, output_file_path)
 
 def load_file(file_path):
+    """Load content from file.
+
+    The implementation needed to load the specific file type is evaluated
+    based on the filename extension.
+
+    Args:
+        file_path (str): The path to the file to be loaded.
+
+    Returns:
+        The loaded file content.
+
+    """
     # Detect format from file name
     _, ext = os.path.splitext(file_path)
     load = _find_IO_function('load', ext)
     return load(file_path)
 
 def convert_unknown_arguments(dictionary):
-    """
+    """Convert strings in dictionary to their proper typed values.
+
     Digits are automatically evaluated by json. We need to evaluate
     booleans.
+
+    Args:
+        dictionary (dict): The dictionary whose values need to be converted.
+
+    >>> ex_dict = { 'flag': 'true', 'verbose': 'False' }
+    >>> convert_unknown_arguments(ex_dict) == {'flag': True, 'verbose': False}
+    True
 
     """
     if not dictionary:
@@ -103,8 +146,7 @@ def _save_generic_file(content, output_file_path):
         f.write(content)
 
 def _find_IO_function(operation, extension):
-    """
-    If the extension is supported, return the related saving function for
+    """If the extension is supported, return the related saving function for
     that specific file type. Otherwise, return reference to a generic saving
     function. Supported `operation` values: 'save', 'load'.
 

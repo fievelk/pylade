@@ -7,10 +7,11 @@ from abc import ABC, abstractmethod
 
 
 class Implementation(ABC):
-    """
-    Implementation interface. Forces a common structure among implementations
-    of different NLP techniques. An implementation can be thought as a model
-    (e.g.: Ngram model implementation, Cavnar-Trenkle model implementation).
+    """Implementation interface.
+
+    Forces a common structure among implementations of different NLP techniques.
+    An implementation can be thought as a model (e.g.: Ngram model
+    implementation, Cavnar-Trenkle model implementation, etc.).
 
     """
 

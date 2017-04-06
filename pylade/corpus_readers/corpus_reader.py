@@ -11,5 +11,13 @@ class CorpusReader(ABC):
 
     @abstractmethod
     def all_instances(self, limit=0):
-        """Return all instances of the dataset with their labels and properties."""
+        """Return all instances of the dataset with their labels and properties.
+
+        Args:
+            limit (int): The maximum number of instances to return.
+
+        Yields:
+            A generator of corpus instances.
+
+        """
         pass
