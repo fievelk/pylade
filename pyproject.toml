@@ -1,9 +1,11 @@
 [tool.poetry]
 name = "pylade"
 version = "0.2.0"
-description = "A lightweight language detection tool written in Python."
+description = "PyLaDe - Language Detection tool written in Python."
 authors = ["Pierpaolo Pantone <24alsecondo@gmail.com>"]
 readme = "README.md"
+repository = "https://github.com/fievelk/pylade"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7 <=3.12"
