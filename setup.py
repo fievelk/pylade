@@ -1,7 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(name='pylade',
-      version='0.1',
+      version='0.2.0',
       description='PyLaDe - Language Detection tool written in Python.',
       url='https://github.com/fievelk/pylade',
       author='Pierpaolo Pantone',
