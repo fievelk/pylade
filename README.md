@@ -12,7 +12,9 @@ The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based appr
   - [Evaluate a model on a test set](#evaluate-a-model-on-a-test-set)
   - [Detect language of a text using a trained model](#detect-language-of-a-text-using-a-trained-model)
   - [Custom implementations and corpora](#custom-implementations-and-corpora)
-- [Development and testing](#development-and-testing)
+- [Development](#development)
+  - [Testing](#testing)
+  - [Generating documentation with Sphinx](#generating-documentation-with-sphinx)
 - [Notes](#notes)
 - [References](#references)
 
@@ -87,12 +89,25 @@ Different language detection approaches can be implemented creating new classes 
 Customized corpus readers can be created the same way, inheriting from the `CorpusReader` interface instead.
 
 
-## Development and testing
+## Development
+
+### Testing
 
 You can install development requirements using Poetry (`poetry install`). This will also install requirements needed for testing.
 
 To run tests, just run `tox` from the package root folder.
 
+### Generating documentation with Sphinx
+
+PyLaDe's documentation is generated using Sphinx. If you want to update the docs, you can install the necessary dependencies with Poetry:
+```console
+$ poetry install --with docs
+```
+Documentation files are automatically generated from code docstrings. To rebuild the documentation to take changes into consideration, just run the following:
+```console
+$ cd docs
+$ make html
+```
 
 ## Notes
 
