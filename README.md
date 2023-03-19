@@ -46,6 +46,9 @@ pylade_train \
 
 `--train-args` is a dictionary of arguments to be passed to the `train()` method of the chosen implementation (`CavnarTrenkleImpl` in the example above). For an accurate description of the arguments please refer to the `train()` method docstring.
 
+**NOTE**: to define a new training set, you can check the format of the file `tests/test_files/training_set_example.csv`.
+
+
 ### Evaluate a model on a test set
 
 ```bash
