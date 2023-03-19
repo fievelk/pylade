@@ -15,3 +15,8 @@ tox = "^4.4.7"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+pylade = "pylade.console_scripts.detect:main"
+pylade_train = "pylade.console_scripts.train:main"
+pylade_eval = "pylade.console_scripts.evaluate:main"
