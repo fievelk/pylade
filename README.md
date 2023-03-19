@@ -8,7 +8,7 @@ The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based appr
 
 ## Requirements
 
-- `python >= 3.4`
+- python 3.7 up to 3.11 (included)
 - `nltk`
 
 ## Installation

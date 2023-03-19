@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pylade"
+version = "0.1.0"
+description = "A lightweight language detection tool written in Python."
+authors = ["Pierpaolo Pantone <24alsecondo@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7 <=3.12"
+
+[tool.poetry.group.dev.dependencies]
+tox = "^4.4.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
