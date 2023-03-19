@@ -2,32 +2,37 @@
 
 [![Build Status](https://travis-ci.org/fievelk/pylade.svg?branch=master)](https://travis-ci.org/fievelk/pylade)
 
-`pylade` is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with a more complex scaffolding for customized tasks.
+`pylade` is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with more complex scaffolding for customized tasks.
 
 The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based approach*. However, the tool can be further expanded with customized language identification implementations.
 
-## Requirements
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Train a model on a training set](#train-a-model-on-a-training-set)
+  - [Evaluate a model on a test set](#evaluate-a-model-on-a-test-set)
+  - [Detect language of a text using a trained model](#detect-language-of-a-text-using-a-trained-model)
+  - [Custom implementations and corpora](#custom-implementations-and-corpora)
+- [Development and testing](#development-and-testing)
+- [Notes](#notes)
+- [References](#references)
 
-- python 3.7 up to 3.11 (included)
-- `nltk`
 
 ## Installation
 
-Download the repository and install using pip (locally):
+You can install using pip:
 
 ```bash
-$ git clone git@github.com:fievelk/PyLaDe.git
-$ cd pylade
-$ pip install .
+$ pip install pylade
 ```
+
 
 ## Usage
 
 For a quick use, simply give the following command from terminal:
 
-```bash
-pylade "Put text here"
-# en
+```console
+$ pylade "Put text here"
+en
 ```
 Done!
 
@@ -35,8 +40,8 @@ If you want to get deeper and use some more advanced features, please keep readi
 
 ### Train a model on a training set
 
-```bash
-pylade_train \
+```console
+$ pylade_train \
     training_set.csv \
     --implementation CavnarTrenkleImpl \
     --corpus-reader TwitterCorpusReader \
@@ -48,11 +53,10 @@ pylade_train \
 
 **NOTE**: to define a new training set, you can check the format of the file `tests/test_files/training_set_example.csv`.
 
-
 ### Evaluate a model on a test set
 
-```bash
-pylade_eval \
+```console
+$ pylade_eval \
     test_set.csv \
     --model model.json \
     --implementation CavnarTrenkleImpl \
@@ -65,8 +69,8 @@ pylade_eval \
 
 ### Detect language of a text using a trained model
 
-```bash
-pylade \
+```console
+$ pylade \
     "Put text here" \
     --model model.json \
     --implementation CavnarTrenkleImpl \
@@ -76,24 +80,24 @@ pylade \
 
 `--predict-args` is a dictionary of arguments to be passed to the `predict_language()` method of the chosen implementation (`CavnarTrenkleImpl` in the example above). For an accurate description of the arguments please refer to the `predict_language()` method docstring.
 
-## Info
-
-The default model (`data/model.json`) has been trained using `limit = 5000`. This value provides a good balance between computational performance and accuracy. Please note that this might change if you use your own data to train a new model.
-
-## Tests
-
-Give the command `tox` from the package root in order to perform tests.
-
-Tests with `tox` require the following dependencies:
-
-- `tox`
-- `pytest`
-
-## Customization
+### Custom implementations and corpora
 
 Different language detection approaches can be implemented creating new classes that inherit from the `Implementation` class. This class should be considered as an interface whose methods are meant to be implemented by the inheriting class.
 
 Customized corpus readers can be created the same way, inheriting from the `CorpusReader` interface instead.
+
+
+## Development and testing
+
+You can install development requirements using Poetry (`poetry install`). This will also install requirements needed for testing.
+
+To run tests, just run `tox` from the package root folder.
+
+
+## Notes
+
+The default model (`data/model.json`) has been trained using `limit = 5000`. This value provides a good balance between computational performance and accuracy. Please note that this might change if you use your own data to train a new model.
+
 
 ## References
 
