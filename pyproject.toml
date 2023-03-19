@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pylade"
+version = "0.2.0"
+description = "PyLaDe - Language Detection tool written in Python."
+authors = ["Pierpaolo Pantone <24alsecondo@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/fievelk/pylade"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7 <=3.12"
+nltk = "^3.8.1"
+
+[tool.poetry.group.dev.dependencies]
+tox = "^4.4.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+pylade = "pylade.console_scripts.detect:main"
+pylade_train = "pylade.console_scripts.train:main"
+pylade_eval = "pylade.console_scripts.evaluate:main"

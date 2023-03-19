@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyLaDe'
-copyright = '2017, Pierpaolo Pantone'
+copyright = '2017-2023 Pierpaolo Pantone'
 author = 'Pierpaolo Pantone'
 
 # The short X.Y version.
