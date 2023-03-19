@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parents[2].resolve()))
 project = 'PyLaDe'
 copyright = '2023, Pierpaolo Pantone'
 author = 'Pierpaolo Pantone'
-release = '0.2.1'
+release = '0.3.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
