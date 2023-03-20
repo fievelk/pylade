@@ -105,7 +105,8 @@ $ poetry install --with docs
 ```
 Documentation files are automatically generated from code docstrings. To rebuild the documentation to take changes into consideration, just run the following:
 ```console
-$ cd docs
+$ sphinx-apidoc pylade -o docs/source
+$ cd docs/
 $ make html
 ```
 
