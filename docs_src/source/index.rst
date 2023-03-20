@@ -24,8 +24,10 @@ If you just want to detect the language of a text, here is what you came for::
    en
 
 PyLaDe allows:
+
+- recognizing the language of a text
 - training your own model
-- using a custom language detection implementation
+- using a custom language detection implementation.
 
 If you want more information about installing and using PyLaDe, you can find up-to-date instructions on the `project's repository <https://github.com/fievelk/pylade>`_.
 
