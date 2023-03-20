@@ -105,7 +105,7 @@ $ poetry install --with docs
 ```
 Documentation files are automatically generated from code docstrings. To rebuild the documentation to take changes into consideration, just run the following:
 ```console
-$ cd docs
+$ cd docs_src/
 $ make html
 ```
 
