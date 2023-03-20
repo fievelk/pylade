@@ -28,7 +28,7 @@ release = '0.3.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx.ext.githubpages',
+    'sphinx.ext.githubpages',  # Generate a .nojekyll file to publish on GitHub pages
     'sphinx.ext.viewcode',
 ]
 
