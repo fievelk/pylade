@@ -108,6 +108,13 @@ Documentation files are automatically generated from code docstrings. To rebuild
 $ cd docs_src/
 $ make html
 ```
+If you have the permissions and you want to update the docs hosted on GitHub pages:
+```console
+$ git checkout gh-pages
+$ git merge master  # Supposing that "master" is the branch with the latest code changes
+$ cd docs_src/
+$ make gh-pages
+```
 
 ## Notes
 
