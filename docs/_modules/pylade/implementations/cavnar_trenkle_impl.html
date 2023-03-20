@@ -1,0 +1,416 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pylade.implementations.cavnar_trenkle_impl &#8212; PyLaDe 0.3.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pylade.implementations.cavnar_trenkle_impl</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Cavnar Trenkle implementation module.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span> <span class="c1"># Safety measure in case we extend to py2.7</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">wordpunct_tokenize</span>
+<span class="kn">from</span> <span class="nn">nltk.util</span> <span class="kn">import</span> <span class="n">ngrams</span>
+
+<span class="kn">from</span> <span class="nn">pylade</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">.implementation</span> <span class="kn">import</span> <span class="n">Implementation</span>
+
+
+<span class="c1"># TODO: Store instance variables (e.g. model)</span>
+<div class="viewcode-block" id="CavnarTrenkleImpl"><a class="viewcode-back" href="../../../pylade.implementations.html#pylade.implementations.cavnar_trenkle_impl.CavnarTrenkleImpl">[docs]</a><span class="k">class</span> <span class="nc">CavnarTrenkleImpl</span><span class="p">(</span><span class="n">Implementation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cavnar Trenkle implementation class.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CavnarTrenkleImpl.train"><a class="viewcode-back" href="../../../pylade.implementations.html#pylade.implementations.cavnar_trenkle_impl.CavnarTrenkleImpl.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labeled_instances</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train the model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            labeled_instances (iterable): An iterable whose elements are</span>
+<span class="sd">                dictionaries. These dictionaries must have `text` and `language`</span>
+<span class="sd">                keys with their relative values.</span>
+<span class="sd">            limit (int): The number of entries in the training language</span>
+<span class="sd">                profiles. Less entries make training faster, but it is better</span>
+<span class="sd">                to keep a balance between speed and accuracy.</span>
+<span class="sd">            verbose (bool): If `True`, print information about training.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of language profiles.</span>
+
+<span class="sd">            A profile is a list of ngrams sorted in reverse order (from the</span>
+<span class="sd">            most frequent to the less frequent). Each language has its own list</span>
+<span class="sd">            (profile). This method returns a dictionary in which each key is a</span>
+<span class="sd">            language whose value is a list of ngrams (the language profile).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Training. Limit: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+
+        <span class="n">language_profiles</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">languages_ngram_freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_languages_ngram_frequencies</span><span class="p">(</span><span class="n">labeled_instances</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sorting language profiles in lists&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">language</span> <span class="ow">in</span> <span class="n">languages_ngram_freqs</span><span class="p">:</span>
+            <span class="n">language_profiles</span><span class="p">[</span><span class="n">language</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_profile_from_frequencies</span><span class="p">(</span>
+                <span class="n">languages_ngram_freqs</span><span class="p">[</span><span class="n">language</span><span class="p">],</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">language_profiles</span></div>
+
+    <span class="c1"># TODO: model should be an instance variable. Actually, the implementation</span>
+    <span class="c1"># IS the model</span>
+<div class="viewcode-block" id="CavnarTrenkleImpl.evaluate"><a class="viewcode-back" href="../../../pylade.implementations.html#pylade.implementations.cavnar_trenkle_impl.CavnarTrenkleImpl.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">test_instances</span><span class="p">,</span> <span class="n">languages</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">split_languages</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate model on test data and gather results.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model: A list of training profiles for languages.</span>
+<span class="sd">            test_instances (iterable): An iterable whose elements are</span>
+<span class="sd">                dictionaries. These dictionaries must have `text` and `language`</span>
+<span class="sd">                keys with their relative values.</span>
+<span class="sd">            languages (iterable): A list of language labels. When specified,</span>
+<span class="sd">                the model is  only evaluated on test instances with these labels</span>
+<span class="sd">                (e.g. &#39;it&#39;).</span>
+<span class="sd">            split_languages (bool): if `True`, each language in `languages` is</span>
+<span class="sd">                evaluated separately and results will be split by language. If</span>
+<span class="sd">                `False` (default) results are computed over all instances</span>
+<span class="sd">                belonging to `languages`.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            A single result in the form of `{&#39;tested_languages&#39;: {error_value:</span>
+<span class="sd">            accuracy}}`</span>
+
+<span class="sd">        NOTE:</span>
+<span class="sd">            If you want to use `test_instances` multiple times, they need to be</span>
+<span class="sd">            stored in a list. Since they are a generator object, they would be</span>
+<span class="sd">            exhausted after the first iteration.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">error_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">error_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8000</span><span class="p">]</span>
+
+        <span class="c1"># Make sure it is a list of integers:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error_values</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">error_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">error_values</span><span class="p">]]</span>
+
+        <span class="c1"># Make sure that test_instances is a list when we need multiple iterations</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">split_languages</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">test_instances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_instances</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Evaluating...&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">languages</span> <span class="ow">and</span> <span class="n">split_languages</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Evaluate performance on each language separately</span>
+            <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">languages</span><span class="p">:</span>
+                <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_single_result</span><span class="p">(</span>
+                    <span class="n">error_values</span><span class="p">,</span> <span class="n">test_instances</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="n">lang</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Evaluate performance on all (specified) languages together</span>
+            <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_single_result</span><span class="p">(</span>
+                <span class="n">error_values</span><span class="p">,</span> <span class="n">test_instances</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">languages</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CavnarTrenkleImpl.predict_language"><a class="viewcode-back" href="../../../pylade.implementations.html#pylade.implementations.cavnar_trenkle_impl.CavnarTrenkleImpl.predict_language">[docs]</a>    <span class="k">def</span> <span class="nf">predict_language</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">training_profiles</span><span class="p">,</span> <span class="n">error_value</span><span class="o">=</span><span class="mi">8000</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict language for a text.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): A text whose language has to be detected.</span>
+<span class="sd">            training_profiles (dict): A dictionary whose keys are language</span>
+<span class="sd">                labels. Each value is a list of &#39;ngrams&#39; sorted by frequency.</span>
+<span class="sd">                This is the actual model used for prediction.</span>
+<span class="sd">            error_value (int): The amount that penalizes the prediction whenever</span>
+<span class="sd">                an ngram is not present in the training profile. This value</span>
+<span class="sd">                should be decided based on tuning on the test set. See paper for</span>
+<span class="sd">                more details.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The predicted language label (e.g. &#39;en&#39;).</span>
+
+<span class="sd">        &gt;&gt;&gt; implementation = CavnarTrenkleImpl()</span>
+<span class="sd">        &gt;&gt;&gt; text = &#39;hello&#39;</span>
+<span class="sd">        &gt;&gt;&gt; training_profiles = {</span>
+<span class="sd">        ... &#39;en&#39;: [&#39;l&#39;, &#39;o&#39;, &#39;lo&#39;, &#39;llo&#39;, &#39;ll&#39;, &#39;hello&#39;, &#39;hell&#39;, &#39;hel&#39;, &#39;he&#39;,</span>
+<span class="sd">        ...       &#39;h&#39;, &#39;ello&#39;, &#39;ell&#39;, &#39;el&#39;, &#39;e&#39;],</span>
+<span class="sd">        ... &#39;it&#39;: [&#39;o&#39;, &#39;iao&#39;, &#39;ia&#39;, &#39;i&#39;, &#39;ciao&#39;, &#39;cia&#39;, &#39;ci&#39;, &#39;c&#39;, &#39;ao&#39;, &#39;a&#39;]}</span>
+<span class="sd">        &gt;&gt;&gt; implementation.predict_language(text, training_profiles)</span>
+<span class="sd">        &#39;en&#39;</span>
+
+<span class="sd">        NOTE:</span>
+<span class="sd">            This is the same as:</span>
+
+<span class="sd">            &gt;&gt;&gt; lang_distances = self.predict_language_scores( # doctest: +SKIP</span>
+<span class="sd">            ...    text, training_profiles, error_value)</span>
+<span class="sd">            &gt;&gt;&gt; min(lang_distances, key=lang_distances.get) # doctest: +SKIP</span>
+
+<span class="sd">        NOTE:</span>
+<span class="sd">            This method could be improved by simply iterating over distances and</span>
+<span class="sd">            discarding them when they are smaller than the previous one. This</span>
+<span class="sd">            would not allow us to reuse `predict_language_scores` here.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">min_distance</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="c1"># Set it to a high number before iterating</span>
+        <span class="n">predicted_language</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">text_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_text_profile</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">language</span> <span class="ow">in</span> <span class="n">training_profiles</span><span class="p">:</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">(</span>
+                <span class="n">text_profile</span><span class="p">,</span> <span class="n">training_profiles</span><span class="p">[</span><span class="n">language</span><span class="p">],</span> <span class="n">error_value</span><span class="o">=</span><span class="n">error_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">min_distance</span><span class="p">:</span>
+                <span class="n">min_distance</span> <span class="o">=</span> <span class="n">distance</span>
+                <span class="n">predicted_language</span> <span class="o">=</span> <span class="n">language</span>
+
+        <span class="k">return</span> <span class="n">predicted_language</span></div>
+
+    <span class="c1"># Private methods #</span>
+
+    <span class="k">def</span> <span class="nf">_compute_profile_from_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequencies_dict</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+        <span class="c1"># Sort by value first, and then also by key (alphabetic order) if values</span>
+        <span class="c1"># are equal.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ngram</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">frequencies_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">limit</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">_compute_text_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; implementation = CavnarTrenkleImpl()</span>
+<span class="sd">        &gt;&gt;&gt; text = &#39;Hello&#39;</span>
+<span class="sd">        &gt;&gt;&gt; implementation._compute_text_profile(text) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">        [&#39;l&#39;, &#39;o&#39;, &#39;lo&#39;, &#39;llo&#39;, &#39;ll&#39;, &#39;hello&#39;, &#39;hell&#39;, &#39;hel&#39;, &#39;he&#39;, &#39;h&#39;,</span>
+<span class="sd">        &#39;ello&#39;, &#39;ell&#39;, &#39;el&#39;, &#39;e&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; implementation._compute_text_profile(text, limit=2)</span>
+<span class="sd">        [&#39;l&#39;, &#39;o&#39;]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text_ngram_freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_text_ngram_freqs</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_profile_from_frequencies</span><span class="p">(</span><span class="n">text_ngram_freqs</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_profile</span><span class="p">,</span> <span class="n">training_profile</span><span class="p">,</span> <span class="n">error_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the distance between two profiles.</span>
+
+<span class="sd">        This method compares two profiles and returns a number which represents</span>
+<span class="sd">        the distance between them. A high distance means that the language of</span>
+<span class="sd">        the texts that have been used to generate the profiles is not the same.</span>
+<span class="sd">        This distance is called &quot;out-of-place&quot; metric in the paper.</span>
+<span class="sd">        We usually compare a language profile (generated from a training set)</span>
+<span class="sd">        to the profile generated from a single text (e.g. a tweet or a facebook</span>
+<span class="sd">        post).</span>
+<span class="sd">        Note: If a ngram is not present in the training profile, we penalize</span>
+<span class="sd">        the text profile using an arbitrary `error_value`. This value should</span>
+<span class="sd">        be decided based on tuning on the test set.</span>
+
+<span class="sd">        &gt;&gt;&gt; text_profile = [&#39;h&#39;, &#39;e&#39;, &#39;l&#39;, &#39;o&#39;, &#39;he&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; training_profile = [&#39;h&#39;, &#39;e&#39;, &#39;l&#39;, &#39;o&#39;, &#39;he&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; implementation = CavnarTrenkleImpl()</span>
+<span class="sd">        &gt;&gt;&gt; implementation._distance(text_profile, training_profile)</span>
+<span class="sd">        0</span>
+<span class="sd">        &gt;&gt;&gt; training_profile = [&#39;l&#39;, &#39;o&#39;, &#39;h&#39;, &#39;e&#39;, &#39;he&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; implementation._distance(text_profile, training_profile)</span>
+<span class="sd">        8</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_distance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">text_ngram</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">text_profile</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">text_ngram</span> <span class="ow">in</span> <span class="n">training_profile</span><span class="p">:</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="n">training_profile</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">text_ngram</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">error_value</span>
+            <span class="n">total_distance</span> <span class="o">+=</span> <span class="n">distance</span>
+
+        <span class="k">return</span> <span class="n">total_distance</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate_for_languages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_instances</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">error_value</span><span class="p">,</span>
+                                <span class="n">languages</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">incorrect</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">labeled_instance</span> <span class="ow">in</span> <span class="n">test_instances</span><span class="p">:</span>
+            <span class="c1"># Skip instances with different languages</span>
+            <span class="c1"># TODO: This would not be necessary if we could use only instances</span>
+            <span class="c1"># with specific labels (a subset of test_instances). To be fixed.</span>
+            <span class="k">if</span> <span class="n">languages</span> <span class="ow">and</span> <span class="n">labeled_instance</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">languages</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">predicted_language</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_language</span><span class="p">(</span>
+                <span class="n">labeled_instance</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span> <span class="n">model</span><span class="p">,</span> <span class="n">error_value</span><span class="o">=</span><span class="n">error_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">predicted_language</span> <span class="o">==</span> <span class="n">labeled_instance</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]:</span>
+                <span class="n">correct</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">incorrect</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Label: </span><span class="si">{}</span><span class="s2">, Guess: </span><span class="si">{}</span><span class="s2">, Correct: </span><span class="si">{}</span><span class="s2">, Incorrect: </span><span class="si">{}</span><span class="s2">, Total: </span><span class="si">{}</span><span class="s2">   &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">labeled_instance</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">],</span>
+                    <span class="n">predicted_language</span><span class="p">,</span>
+                    <span class="n">correct</span><span class="p">,</span>
+                    <span class="n">incorrect</span><span class="p">,</span>
+                    <span class="n">total</span><span class="p">),</span>
+                <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">total</span>
+        <span class="c1"># single_result = {languages: {str(err_val): accuracy}}</span>
+        <span class="c1"># TODO: this should be a dictionary: {&#39;accuracy&#39;: accuracy}</span>
+        <span class="k">return</span> <span class="n">accuracy</span>
+
+    <span class="k">def</span> <span class="nf">_eval_single_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_values</span><span class="p">,</span> <span class="n">test_instances</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">languages</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate performance on specified languages.</span>
+
+<span class="sd">        If no languages have been specified, use all available languages.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tested_langs</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">languages</span><span class="p">)</span> <span class="k">if</span> <span class="n">languages</span> <span class="k">else</span> <span class="s1">&#39;ALL&#39;</span>
+        <span class="k">for</span> <span class="n">err_val</span> <span class="ow">in</span> <span class="n">error_values</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Evaluating results for LANG: </span><span class="si">{}</span><span class="s2">, ERR_VAL: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">tested_langs</span><span class="p">,</span>
+                <span class="n">err_val</span><span class="p">))</span>
+            <span class="n">accuracy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_for_languages</span><span class="p">(</span>
+                <span class="n">test_instances</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">err_val</span><span class="p">,</span> <span class="n">languages</span><span class="p">)</span>
+            <span class="n">single_result</span> <span class="o">=</span> <span class="p">{</span><span class="n">tested_langs</span><span class="p">:</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">err_val</span><span class="p">):</span> <span class="n">accuracy</span><span class="p">}}</span>
+            <span class="k">yield</span> <span class="n">single_result</span>
+
+    <span class="k">def</span> <span class="nf">_extract_text_ngram_freqs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tokenize the text.</span>
+
+<span class="sd">        For each token in the text, extract ngrams of different length (from 1</span>
+<span class="sd">        to 5). Compute how many times each of these ngrams occur in the text.</span>
+<span class="sd">        Then return a dictionary of { ngram: frequencies }.</span>
+
+<span class="sd">        &gt;&gt;&gt; implementation = CavnarTrenkleImpl()</span>
+<span class="sd">        &gt;&gt;&gt; ngrams = implementation._extract_text_ngram_freqs(&quot;HeLLo&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; ngrams == {&#39;h&#39;:1, &#39;e&#39;: 1, &#39;l&#39;: 2, &#39;o&#39;: 1, &#39;he&#39;: 1, &#39;el&#39;: 1, &#39;ll&#39;: 1, \</span>
+<span class="sd">            &#39;lo&#39;: 1, &#39;hel&#39;: 1, &#39;ell&#39;: 1, &#39;llo&#39;: 1, &#39;hell&#39;: 1, &#39;ello&#39;: 1, &#39;hello&#39;: 1}</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; ngrams = implementation._extract_text_ngram_freqs(&quot;CIAO&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; ngrams == {&#39;c&#39;:1, &#39;i&#39;: 1, &#39;a&#39;: 1, &#39;o&#39;: 1, &#39;ci&#39;: 1, &#39;ia&#39;: 1, &#39;ao&#39;: 1, \</span>
+<span class="sd">            &#39;cia&#39;: 1, &#39;iao&#39;: 1, &#39;ciao&#39;: 1}</span>
+<span class="sd">        True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">wordpunct_tokenize</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="c1"># Force lower case</span>
+        <span class="c1"># TODO: Delete numbers and punctuation</span>
+        <span class="c1"># TODO: Should we use nltk twitter tokenizer?</span>
+
+        <span class="n">ngram_freqs</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="c1"># Use 1-grams to 5-grams</span>
+                <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                    <span class="n">ngram_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ngram</span><span class="p">)</span>
+                    <span class="n">ngram_freqs</span><span class="p">[</span><span class="n">ngram_string</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># ngram_freqs[ngrams(token, n)] += 1</span>
+
+        <span class="k">return</span> <span class="n">ngram_freqs</span>
+
+    <span class="k">def</span> <span class="nf">_languages_ngram_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labeled_instances</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute ngram frequencies for each language in the corpus.</span>
+
+<span class="sd">        &gt;&gt;&gt; implementation = CavnarTrenkleImpl()</span>
+<span class="sd">        &gt;&gt;&gt; tweets = [{&#39;language&#39;: &#39;it&#39;, &#39;id_str&#39;: &#39;12&#39;, &#39;text&#39;: &#39;Ciao&#39;}, \</span>
+<span class="sd">                      {&#39;language&#39;: &#39;en&#39;, &#39;id_str&#39;: &#39;15&#39;, &#39;text&#39;: &#39;Hello&#39;}]</span>
+<span class="sd">        &gt;&gt;&gt; lang_ngram_freqs = implementation._languages_ngram_frequencies(tweets)</span>
+<span class="sd">        &gt;&gt;&gt; lang_ngram_freqs == {\</span>
+<span class="sd">            &#39;it&#39;: {&#39;c&#39;:1, &#39;i&#39;: 1, &#39;a&#39;: 1, &#39;o&#39;: 1, &#39;ci&#39;: 1, &#39;ia&#39;: 1, &#39;ao&#39;: 1, \</span>
+<span class="sd">                   &#39;cia&#39;: 1, &#39;iao&#39;: 1, &#39;ciao&#39;: 1}, \</span>
+<span class="sd">            &#39;en&#39;: {&#39;h&#39;:1, &#39;e&#39;: 1, &#39;l&#39;: 2, &#39;o&#39;: 1, &#39;he&#39;: 1, &#39;el&#39;: 1, &#39;ll&#39;: 1, \</span>
+<span class="sd">                   &#39;lo&#39;: 1, &#39;hel&#39;: 1, &#39;ell&#39;: 1, &#39;llo&#39;: 1, &#39;hell&#39;: 1, &#39;ello&#39;: 1, \</span>
+<span class="sd">                   &#39;hello&#39;: 1}}</span>
+<span class="sd">        True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># freqs = defaultdict(lambda : defaultdict(int)) # Not working with Pickle</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">nested_defaultdict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="n">labeled_instances</span><span class="p">:</span>
+            <span class="n">lang</span> <span class="o">=</span> <span class="n">instance</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]</span>
+            <span class="n">instance_ngram_freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_text_ngram_freqs</span><span class="p">(</span><span class="n">instance</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">merge_dictionaries_summing</span><span class="p">(</span><span class="n">freqs</span><span class="p">[</span><span class="n">lang</span><span class="p">],</span> <span class="n">instance_ngram_freqs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">freqs</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyLaDe</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pylade</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pierpaolo Pantone.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

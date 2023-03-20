@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pylade.corpus_readers.twitter_corpus_reader &#8212; PyLaDe 0.3.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pylade.corpus_readers.twitter_corpus_reader</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Corpus reader for twitter datasets.</span>
+
+<span class="sd">The corpus has been obtained using the original Twitter dataset with language</span>
+<span class="sd">labels (see URL below). Tweet IDs have been subsequently hydrated using Twitter</span>
+<span class="sd">APIs and NLTK. The result is a new dataset (CSV format) with the following</span>
+<span class="sd">structure:</span>
+
+<span class="sd">    language|id_str|text</span>
+
+<span class="sd">where `language` is the label, `id_str` is the tweet ID, and `text` is the</span>
+<span class="sd">content of the tweet.</span>
+
+<span class="sd">Original Twitter data:</span>
+
+<span class="sd">- https://blog.twitter.com/2015/evaluating-language-identification-performance</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">.csv_corpus_reader</span> <span class="kn">import</span> <span class="n">CSVCorpusReader</span>
+
+<span class="c1"># AVAILABLE_LANGUAGES = set({</span>
+<span class="c1">#     &#39;ar&#39;, &#39;ar_LATN&#39;, &#39;az&#39;, &#39;bg&#39;, &#39;bn&#39;, &#39;bs&#39;, &#39;ca&#39;, &#39;cs&#39;, &#39;cy&#39;, &#39;da&#39;, &#39;de&#39;, &#39;dv&#39;,</span>
+<span class="c1">#     &#39;el&#39;, &#39;en&#39;, &#39;es&#39;, &#39;et&#39;, &#39;eu&#39;, &#39;fa&#39;, &#39;fi&#39;, &#39;fr&#39;, &#39;gl&#39;, &#39;ha&#39;, &#39;he&#39;, &#39;hi&#39;, &#39;hi-Latn&#39;,</span>
+<span class="c1">#     &#39;hr&#39;, &#39;ht&#39;, &#39;hu&#39;, &#39;hy&#39;, &#39;id&#39;, &#39;is&#39;, &#39;it&#39;, &#39;ja&#39;, &#39;ja_LATN&#39;, &#39;jv&#39;, &#39;km&#39;, &#39;ko&#39;,</span>
+<span class="c1">#     &#39;ko_LATN&#39;, &#39;la&#39;, &#39;lt&#39;, &#39;lv&#39;, &#39;mk&#39;, &#39;ml_LATN&#39;, &#39;mn&#39;, &#39;mn_LATN&#39;, &#39;mr&#39;, &#39;ms&#39;,</span>
+<span class="c1">#     &#39;ne&#39;, &#39;nl&#39;, &#39;no&#39;, &#39;pl&#39;, &#39;ps&#39;, &#39;ps_LATN&#39;, &#39;pt&#39;, &#39;ro&#39;, &#39;ru&#39;, &#39;si&#39;, &#39;sk&#39;, &#39;sl&#39;,</span>
+<span class="c1">#     &#39;sq&#39;, &#39;sr&#39;, &#39;su&#39;, &#39;sv&#39;, &#39;sw&#39;, &#39;ta&#39;, &#39;ta_LATN&#39;, &#39;th&#39;, &#39;tl&#39;, &#39;tn&#39;, &#39;tr&#39;, &#39;uk&#39;,</span>
+<span class="c1">#     &#39;und&#39;, &#39;ur&#39;, &#39;ur_LATN&#39;, &#39;vi&#39;, &#39;wo&#39;, &#39;xh&#39;, &#39;zh-CN&#39;, &#39;zh-TW&#39;, &#39;zu&#39;</span>
+<span class="c1"># })</span>
+
+<div class="viewcode-block" id="TwitterCorpusReader"><a class="viewcode-back" href="../../../pylade.corpus_readers.html#pylade.corpus_readers.twitter_corpus_reader.TwitterCorpusReader">[docs]</a><span class="k">class</span> <span class="nc">TwitterCorpusReader</span><span class="p">(</span><span class="n">CSVCorpusReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Corpus Reader for custom Twitter corpus.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        corpus_path (str): A path leading to a CSV corpus file.</span>
+<span class="sd">        delimiter (str): The character that separates the CSV corpus columns.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corpus_path</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">corpus_path</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_languages</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">available_languages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A list of the available languages in the corpus.</span>
+
+<span class="sd">        `und` is for &#39;undefined&#39;.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># return AVAILABLE_LANGUAGES</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_languages</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_available_languages</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">languages_tweets_stats</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_languages</span>
+
+<div class="viewcode-block" id="TwitterCorpusReader.tweets_with_language"><a class="viewcode-back" href="../../../pylade.corpus_readers.html#pylade.corpus_readers.twitter_corpus_reader.TwitterCorpusReader.tweets_with_language">[docs]</a>    <span class="k">def</span> <span class="nf">tweets_with_language</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">languages</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve tweets with specific languages from the corpus.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            languages (list): A list of language labels used to filter tweets.</span>
+<span class="sd">            limit (int): The maximum number of tweets to return.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            A generator of tweets with specific language labels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">tweet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_instances</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">tweet</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">languages</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">yield</span> <span class="n">tweet</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
+                <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TwitterCorpusReader.languages_tweets_stats"><a class="viewcode-back" href="../../../pylade.corpus_readers.html#pylade.corpus_readers.twitter_corpus_reader.TwitterCorpusReader.languages_tweets_stats">[docs]</a>    <span class="k">def</span> <span class="nf">languages_tweets_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a defaultdict containing the number of tweets for each</span>
+<span class="sd">        language in the corpus. E.g.:</span>
+
+<span class="sd">            defaultdict(int, {&#39;en&#39;: 200, &#39;it&#39;: 140})</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">languages_tweets_stats</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tweet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_instances</span><span class="p">():</span>
+            <span class="n">lang</span> <span class="o">=</span> <span class="n">tweet</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]</span>
+            <span class="n">languages_tweets_stats</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">languages_tweets_stats</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyLaDe</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pylade</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pierpaolo Pantone.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
