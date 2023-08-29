@@ -1,6 +1,6 @@
 # PyLaDe
 
-[![Build Status](https://travis-ci.org/fievelk/pylade.svg?branch=master)](https://travis-ci.org/fievelk/pylade)
+![Build Status](https://github.com/fievelk/pylade/actions/workflows/ci_checks.yml/badge.svg)
 
 `pylade` is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with more complex scaffolding for customized tasks.
 

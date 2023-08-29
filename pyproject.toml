@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pylade"
-version = "1.0.0"
+version = "1.1.0"
 description = "PyLaDe - Language Detection tool written in Python."
 authors = ["Pierpaolo Pantone <24alsecondo@gmail.com>"]
 readme = "README.md"
