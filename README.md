@@ -1,5 +1,7 @@
 # PyLaDe
 
+![Build Status](https://github.com/fievelk/pylade/actions/workflows/ci_checks.yml/badge.svg)
+
 `pylade` is a lightweight language detection tool written in Python. The tool provides a ready-to-use command-line interface, along with more complex scaffolding for customized tasks.
 
 The current version of `pylade` implements the *Cavnar-Trenkle N-Gram-based approach*. However, the tool can be further expanded with customized language identification implementations.
