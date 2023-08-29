@@ -16,6 +16,10 @@ tox = "^4.4.7"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2.4"
+# Override requests (subdependency of sphinx) to fix vulnerability issue:
+# See: https://github.com/advisories/GHSA-j8r2-6x86-q33q
+# See: https://nvd.nist.gov/vuln/detail/CVE-2023-32681
+requests = "^2.31"
 
 [build-system]
 requires = ["poetry-core"]
